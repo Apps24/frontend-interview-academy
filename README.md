@@ -26,6 +26,8 @@ Run `npm run check` before committing.
 
 The initial migration is in `supabase/migrations`. It separates public published curriculum from owner-only progress, attempts, profiles, and entitlements. Secret/service credentials must never be placed in `NEXT_PUBLIC_*` variables.
 
+Hosted project: `frontend-interview-academy` (`gverxjnipznemvmdxdxf`) in Mumbai. Local development uses the publishable key in the ignored `.env.local`; no privileged key is required by the browser application.
+
 ## Cloudflare
 
 `npm run cf:check` reports compatibility. `npm run build:vinext` creates the Worker build, and `npm run deploy:vinext` deploys it after Cloudflare authentication is available. See `docs/ARCHITECTURE.md`.
