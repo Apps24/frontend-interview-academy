@@ -1,0 +1,43 @@
+{
+  "name": "frontend-interview-academy",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm run build && npm run build:vinext",
+    "cf:check": "vinext check",
+    "dev:vinext": "vinext dev --port 3001",
+    "build:vinext": "vinext build",
+    "start:vinext": "wrangler dev --config dist/server/wrangler.json",
+    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.116.0",
+    "next": "16.3.5",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@cloudflare/vite-plugin": "1.54.11",
+    "@tailwindcss/postcss": "4.1.13",
+    "@types/node": "20.19.17",
+    "@types/react": "19.1.13",
+    "@types/react-dom": "19.1.9",
+    "@vinext/cloudflare": "1.0.0-beta.8",
+    "@vitejs/plugin-rsc": "0.5.35",
+    "eslint": "9.35.0",
+    "eslint-config-next": "16.3.5",
+    "react-server-dom-webpack": "19.2.8",
+    "tailwindcss": "4.1.13",
+    "typescript": "5.9.2",
+    "vinext": "1.0.0-beta.10",
+    "vite": "8.3.0",
+    "wrangler": "4.133.0"
+  }
+}
