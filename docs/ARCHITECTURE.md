@@ -14,4 +14,8 @@ Cloudflare's current preferred Next.js path is vinext, which is still marked bet
 
 ## ADR-004: Progress
 
-Page views do not equal completion. Durable completion requires a checkpoint attempt. The Phase 0 prototype stores the sample result locally; the next slice writes `lesson_progress` and `question_attempts` through the authenticated RLS-scoped client.
+Page views do not equal completion. Durable completion requires a checkpoint attempt. Phase 1 writes `lesson_progress` and `question_attempts` through authenticated server actions using the learner's RLS-scoped session. A later incorrect retry must never regress an already completed lesson.
+
+## ADR-005: Authentication
+
+Supabase Auth sessions are stored in cookies through `@supabase/ssr`. Next.js Proxy refreshes and validates the token with `getClaims()`, and every protected page and server action independently verifies the claims before reading or mutating user data. Only the publishable key is available to browser code.

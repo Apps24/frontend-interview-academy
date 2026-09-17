@@ -2,13 +2,16 @@
 
 A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and deadline-driven interview preparation.
 
-## Current Phase 0 slice
+## Current Phase 1 slice
 
 - Responsive dark product homepage
 - HTML/CSS/JavaScript track previews
 - Two-day interview sprint preview
 - Original JavaScript lesson
-- Interactive knowledge check with local progress
+- Email/password signup, confirmation, sign-in, and sign-out
+- Protected learner progress dashboard
+- Interactive knowledge check with per-user Supabase persistence
+- Durable lesson completion and quiz-attempt history
 - Supabase schema with per-user RLS policies
 - Supabase browser/server client factories using publishable keys
 - Cloudflare vinext configuration with a verified production build
@@ -20,11 +23,13 @@ A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and dead
 3. Run `npm run dev`.
 4. Open `http://localhost:3000`.
 
+For confirmation emails outside local development, add the deployed `/auth/confirm` URL to the Supabase Auth redirect allow list and set `NEXT_PUBLIC_SITE_URL` in the deployment environment.
+
 Run `npm run check` before committing.
 
 ## Database
 
-The initial migration is in `supabase/migrations`. It separates public published curriculum from owner-only progress, attempts, profiles, and entitlements. Secret/service credentials must never be placed in `NEXT_PUBLIC_*` variables.
+Migrations are in `supabase/migrations`. They separate public published curriculum from owner-only progress, attempts, profiles, and entitlements, and seed the first published JavaScript checkpoint with stable IDs. Secret/service credentials must never be placed in `NEXT_PUBLIC_*` variables.
 
 Hosted project: `frontend-interview-academy` (`gverxjnipznemvmdxdxf`) in Mumbai. Local development uses the publishable key in the ignored `.env.local`; no privileged key is required by the browser application.
 

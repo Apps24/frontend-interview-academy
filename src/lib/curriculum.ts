@@ -5,8 +5,8 @@ export const tracks = [
 ];
 
 export const variablesLesson = {
-  slug: "variables-and-types", track: "Modern JavaScript", module: "JavaScript foundations", order: 2, title: "Variables & data types",
+  id: "10000000-0000-4000-8000-000000000003", slug: "variables-and-types", version: 1, track: "Modern JavaScript", module: "JavaScript foundations", order: 2, title: "Variables & data types",
   summary: "Understand how JavaScript stores values, how declarations differ, and what interviewers mean by primitive versus reference values.",
   objectives: ["Choose between const and let", "Recognize JavaScript's primitive values", "Explain value versus reference behavior"],
-  question: { id: "js-vars-001", prompt: "What does this code print?", code: "const user = { name: 'Mira' };\nconst copy = user;\ncopy.name = 'Ari';\nconsole.log(user.name);", options: ["Mira", "Ari", "undefined", "It throws an error"], answer: 1, explanation: "Objects are assigned by sharing a reference to the same object. Changing copy.name changes the object that user also points to." },
+  question: { id: "10000000-0000-4000-8000-000000000004", slug: "js-vars-001", version: 1, prompt: "What does this code print?", code: "const user = { name: 'Mira' };\nconst copy = user;\ncopy.name = 'Ari';\nconsole.log(user.name);", options: ["Mira", "Ari", "undefined", "It throws an error"], answer: 1, explanation: "Objects are assigned by sharing a reference to the same object. Changing copy.name changes the object that user also points to." },
 };
