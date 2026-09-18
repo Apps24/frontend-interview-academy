@@ -7,6 +7,7 @@ export type SprintItem = {
   title: string;
   description: string;
   outcome: string;
+  href?: string;
 };
 
 export const sprintItems: SprintItem[] = [
@@ -18,7 +19,7 @@ export const sprintItems: SprintItem[] = [
   { key: "async-browser", day: 2, time: "09:00", duration: 60, category: "LEARN", title: "Async JavaScript & browser", description: "Trace promises, event-loop ordering, fetch cancellation, storage, and rendering phases.", outcome: "Solve five async output questions." },
   { key: "framework-design", day: 2, time: "10:15", duration: 60, category: "EXPLAIN", title: "Framework architecture", description: "Explain state ownership, rendering, forms, data fetching, performance, and component boundaries.", outcome: "Deliver four two-minute architecture answers." },
   { key: "debugging", day: 2, time: "11:30", duration: 45, category: "DEBUG", title: "Debugging drill", description: "Diagnose one rendering bug, one network failure, and one stale-state problem.", outcome: "Write the evidence and root cause for each." },
-  { key: "behavioral", day: 2, time: "13:00", duration: 45, category: "SPEAK", title: "Behavioral STAR stories", description: "Prepare concise stories for ownership, conflict, failure, learning, and delivery pressure.", outcome: "Record five answers under two minutes each." },
+  { key: "behavioral", day: 2, time: "13:00", duration: 45, category: "SPEAK", title: "Behavioral STAR stories", description: "Prepare concise stories for ownership, conflict, failure, learning, and delivery pressure.", outcome: "Record five answers under two minutes each.", href: "/behavioral" },
   { key: "mock-review", day: 2, time: "14:00", duration: 75, category: "MOCK", title: "Mock interview & final review", description: "Run a realistic technical round, score unclear answers, and make a final one-page recall sheet.", outcome: "Finish with a targeted last-hour checklist." },
 ];
 

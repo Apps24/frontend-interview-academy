@@ -27,3 +27,7 @@ The sprint schedule is versioned application content, while `sprint_item_progres
 ## ADR-007: Curriculum expansion
 
 Phase 2 follows a progressive JavaScript topic order—expressions, values, conversion, equality, closures, then asynchronous flow—while keeping all explanations, examples, questions, and interview notes original. Stable database UUIDs connect published curriculum rows to per-user progress without coupling lesson prose to database rendering.
+
+## ADR-008: Behavioral answers
+
+Behavioral questions and their categories are published database content with the same free/Pro split as the technical bank: public rows hold the prompt, why it is asked, and what to cover; `behavioral_answer_guides` holds the example outline, pitfalls, and follow-ups behind an entitlement-aware policy. Learner answers are stored as structured STAR fields in `star_drafts` (owner-only RLS on every command) rather than one free-text blob so the review heuristics can measure section balance, and so future features such as printable answer sheets or mock-interview prompts can reuse the parts. Review feedback is computed in the browser from the draft alone; nothing is sent to a model. An earlier uncommitted schema for this feature was replaced by the repository migration so the migration history and the hosted project match.

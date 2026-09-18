@@ -54,9 +54,9 @@ const topicTasks: Record<FocusTopic, LastMinuteTask[]> = {
     { key: "coding-review", title: "Review a prior solution", category: "REVIEW", minutes: 20, description: "Improve naming, edge cases, and complexity in an existing solution.", outcome: "Explain the tradeoffs of the revision", href: "/practice" },
   ],
   behavioral: [
-    { key: "behavioral-star", title: "Build three STAR stories", category: "STORY", minutes: 25, description: "Prepare ownership, conflict, and failure stories with specific actions and results.", outcome: "Three stories under two minutes each" },
-    { key: "behavioral-record", title: "Record behavioral answers", category: "SPEAK", minutes: 20, description: "Record answers, remove vague language, and lead with the result.", outcome: "One improved second take" },
-    { key: "behavioral-values", title: "Motivation and role fit", category: "ALIGN", minutes: 15, description: "Connect your experience, next step, and the target role without generic claims.", outcome: "A concise why-you, why-now answer" },
+    { key: "behavioral-star", title: "Build three STAR stories", category: "STORY", minutes: 25, description: "Prepare ownership, conflict, and failure stories with specific actions and results.", outcome: "Three stories under two minutes each", href: "/behavioral?category=ownership" },
+    { key: "behavioral-record", title: "Record behavioral answers", category: "SPEAK", minutes: 20, description: "Record answers, remove vague language, and lead with the result.", outcome: "One improved second take", href: "/behavioral" },
+    { key: "behavioral-values", title: "Motivation and role fit", category: "ALIGN", minutes: 15, description: "Connect your experience, next step, and the target role without generic claims.", outcome: "A concise why-you, why-now answer", href: "/behavioral?category=introduction" },
   ],
 };
 

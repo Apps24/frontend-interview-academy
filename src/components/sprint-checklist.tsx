@@ -40,7 +40,7 @@ export function SprintChecklist({ items, initialCompleted, isAuthenticated }: Sp
     {[1, 2].map((day) => <section className="sprint-day" key={day}><header><div><span className="overline accent">DAY {day} OF 2</span><h2>{day === 1 ? "Core knowledge & coding" : "Explanation, debugging & rehearsal"}</h2></div><strong>{items.filter((item) => item.day === day).reduce((total, item) => total + item.duration, 0) / 60} hours</strong></header>
       <div className="sprint-task-list">{items.filter((item) => item.day === day).map((item) => {
         const isDone = completedSet.has(item.key);
-        return <article className={`sprint-task ${isDone ? "done" : ""}`} key={item.key}><button type="button" className="sprint-check" aria-label={`${isDone ? "Reopen" : "Complete"} ${item.title}`} aria-pressed={isDone} disabled={isPending} onClick={() => toggle(item.key)}>{isDone ? "✓" : ""}</button><time>{item.time}</time><div><span>{item.category} · {item.duration} MIN</span><h3>{item.title}</h3><p>{item.description}</p><small><b>Finish with:</b> {item.outcome}</small></div></article>;
+        return <article className={`sprint-task ${isDone ? "done" : ""}`} key={item.key}><button type="button" className="sprint-check" aria-label={`${isDone ? "Reopen" : "Complete"} ${item.title}`} aria-pressed={isDone} disabled={isPending} onClick={() => toggle(item.key)}>{isDone ? "✓" : ""}</button><time>{item.time}</time><div><span>{item.category} · {item.duration} MIN</span><h3>{item.title}</h3><p>{item.description}</p><small><b>Finish with:</b> {item.outcome}</small>{item.href && <Link href={item.href} className="sprint-task-link">Open workspace →</Link>}</div></article>;
       })}</div>
     </section>)}
   </>;

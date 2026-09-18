@@ -2,7 +2,7 @@
 
 A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and deadline-driven interview preparation.
 
-## Current Phase 3 slice
+## Current Phase 4 slice
 
 - Responsive dark product homepage
 - HTML/CSS/JavaScript track previews
@@ -26,6 +26,10 @@ A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and dead
 - Durable per-user planner settings and task completion, with a useful unsigned local mode
 - Twelve-question frontend diagnostic with server-only answer keys and topic-level scoring
 - Saved attempt history and weak-topic recommendations that prefill the last-minute planner
+- Behavioral and general interview bank: 24 original questions across six categories, each with what the interviewer is checking and what a strong answer covers
+- STAR answer workspace with instant review (length, spoken time, Action share, "I" versus "we", measurable result), a rehearsal script mode, and draft/ready status
+- Per-user STAR drafts protected by Row Level Security, with a local mode for unsigned visitors and a ready-count on the account dashboard
+- Pro-gated example outlines, common pitfalls, and likely follow-ups stored separately from the public question rows
 - Free/Pro product preview; payment checkout is reserved for the payments phase
 - Supabase schema with per-user RLS policies
 - Supabase browser/server client factories using publishable keys
@@ -44,7 +48,7 @@ Run `npm run check` before committing.
 
 ## Database
 
-Migrations are in `supabase/migrations`. They separate public published curriculum and question previews from owner-only progress and bookmarks. Premium answer bodies live in a separate RLS-protected table and require an active Pro entitlement. Six JavaScript checkpoints use stable IDs so application content and saved progress remain aligned. Secret/service credentials must never be placed in `NEXT_PUBLIC_*` variables.
+Migrations are in `supabase/migrations`. They separate public published curriculum and question previews from owner-only progress and bookmarks. Premium answer bodies and behavioral example outlines live in separate RLS-protected tables and require an active Pro entitlement. Six JavaScript checkpoints use stable IDs so application content and saved progress remain aligned. Secret/service credentials must never be placed in `NEXT_PUBLIC_*` variables.
 
 Hosted project: `frontend-interview-academy` (`gverxjnipznemvmdxdxf`) in Mumbai. Local development uses the publishable key in the ignored `.env.local`; no privileged key is required by the browser application.
 
