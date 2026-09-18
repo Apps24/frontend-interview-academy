@@ -5,10 +5,10 @@ import { sprintItems } from "@/lib/interview-sprint";
 import { tracks } from "@/lib/curriculum";
 
 const interviewTopics = [
-  ["JavaScript", "68 questions", "#a78bfa"],
-  ["Browser & Web", "42 questions", "#38bdf8"],
-  ["HTML & Accessibility", "35 questions", "#34d399"],
-  ["CSS", "39 questions", "#fb7185"],
+  ["JavaScript", "6 launch questions", "#a78bfa", "javascript"],
+  ["Browser & Web", "4 launch questions", "#38bdf8", "browser-web"],
+  ["HTML & Accessibility", "3 launch questions", "#34d399", "html-accessibility"],
+  ["CSS", "3 launch questions", "#fb7185", "css"],
 ];
 
 export default function Home() {
@@ -67,9 +67,10 @@ export default function Home() {
 
       <section className="interview-section page-width" id="interview">
         <div className="section-heading"><div><span className="overline accent">ANSWER WITH CONFIDENCE</span><h2>Interview answers with depth.</h2></div><p>Start with the 30-second answer, then open the reasoning, examples, and likely follow-ups.</p></div>
-        <div className="topic-grid">{interviewTopics.map(([title, count, color], index) => <article className="topic-card" key={title} style={{ "--topic": color } as React.CSSProperties}><span className="topic-number">0{index + 1}</span><div><h3>{title}</h3><p>{count}</p></div><span className="topic-arrow">↗</span></article>)}</div>
+        <div className="topic-grid">{interviewTopics.map(([title, count, color, slug], index) => <Link href={`/interview?topic=${slug}`} className="topic-card" key={title} style={{ "--topic": color } as React.CSSProperties}><span className="topic-number">0{index + 1}</span><div><h3>{title}</h3><p>{count}</p></div><span className="topic-arrow">↗</span></Link>)}</div>
       </section>
-      <footer className="site-footer page-width"><div className="brand"><span className="brand-mark">F</span><span>Frontend<strong>Prep</strong></span></div><p>Learn clearly. Practice deliberately. Interview confidently.</p><span>Phase 2 · Original learning content</span></footer>
+      <section className="pricing-section page-width" id="pricing"><div className="section-heading"><div><span className="overline accent">SIMPLE ACCESS</span><h2>Start free. Go deeper with Pro.</h2></div><p>Learn the foundations before paying. Upgrade only when you want the complete interview answer library.</p></div><div className="pricing-grid"><article><span className="overline">FREE</span><h3>$0</h3><p>Build momentum with the core learning and practice experience.</p><ul><li>JavaScript learning track</li><li>10 detailed interview answers</li><li>Two-day interview sprint</li><li>Progress and bookmarks</li></ul><Link href="/auth?mode=signup" className="button button-secondary">Start free</Link></article><article className="featured"><span className="overline accent">PRO · COMING NEXT</span><h3>Full library</h3><p>Go beyond memorized replies with deeper explanations and follow-ups.</p><ul><li>Every detailed interview answer</li><li>Code examples and mental models</li><li>Advanced follow-up prompts</li><li>Future premium prep tracks</li></ul><Link href="/interview" className="button button-primary">Preview Pro questions</Link></article></div></section>
+      <footer className="site-footer page-width"><div className="brand"><span className="brand-mark">F</span><span>Frontend<strong>Prep</strong></span></div><p>Learn clearly. Practice deliberately. Interview confidently.</p><span>Phase 3 · Interview question bank</span></footer>
     </main>
   );
 }

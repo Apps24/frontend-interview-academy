@@ -2,7 +2,7 @@
 
 A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and deadline-driven interview preparation.
 
-## Current Phase 2 slice
+## Current Phase 3 slice
 
 - Responsive dark product homepage
 - HTML/CSS/JavaScript track previews
@@ -15,6 +15,12 @@ A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and dead
 - Six original JavaScript foundation lessons with saved checkpoints
 - Two-day interview sprint with ten focused sessions
 - Per-user sprint completion protected by Row Level Security
+- Searchable interview bank with topic, difficulty, access, and bookmark filters
+- 16 original frontend questions across JavaScript, Browser & Web, HTML & Accessibility, and CSS
+- Public 30-second answers with deeper explanations, code examples, and follow-up prompts
+- Database-enforced Free/Pro access: premium answers are stored separately and protected by RLS
+- Per-user saved questions and plan summary on the account dashboard
+- Free/Pro product preview; payment checkout is reserved for the payments phase
 - Supabase schema with per-user RLS policies
 - Supabase browser/server client factories using publishable keys
 - Cloudflare vinext configuration with a verified production build
@@ -32,7 +38,7 @@ Run `npm run check` before committing.
 
 ## Database
 
-Migrations are in `supabase/migrations`. They separate public published curriculum from owner-only lesson progress, sprint progress, attempts, profiles, and entitlements. Six JavaScript checkpoints use stable IDs so application content and saved progress remain aligned. Secret/service credentials must never be placed in `NEXT_PUBLIC_*` variables.
+Migrations are in `supabase/migrations`. They separate public published curriculum and question previews from owner-only progress and bookmarks. Premium answer bodies live in a separate RLS-protected table and require an active Pro entitlement. Six JavaScript checkpoints use stable IDs so application content and saved progress remain aligned. Secret/service credentials must never be placed in `NEXT_PUBLIC_*` variables.
 
 Hosted project: `frontend-interview-academy` (`gverxjnipznemvmdxdxf`) in Mumbai. Local development uses the publishable key in the ignored `.env.local`; no privileged key is required by the browser application.
 
