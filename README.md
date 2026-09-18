@@ -20,6 +20,8 @@ A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and dead
 - Public 30-second answers with deeper explanations, code examples, and follow-up prompts
 - Database-enforced Free/Pro access: premium answers are stored separately and protected by RLS
 - Per-user saved questions and plan summary on the account dashboard
+- Six coding challenges with an isolated browser test runner, hints, saved drafts, and solved progress
+- RLS-protected practice drafts and entitlement-gated reference solutions
 - Free/Pro product preview; payment checkout is reserved for the payments phase
 - Supabase schema with per-user RLS policies
 - Supabase browser/server client factories using publishable keys
