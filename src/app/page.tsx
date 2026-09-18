@@ -58,7 +58,7 @@ export default function Home() {
       <section className="sprint-wrap" id="sprint"><div className="sprint page-width">
         <div className="sprint-copy"><span className="overline accent">INTERVIEW IN 48 HOURS?</span><h2>Cut the noise.<br />Study what matters.</h2><p>Your diagnostic score, target role, and available hours become a focused two-day plan.</p>
           <ul><li><span>01</span> Find your highest-impact weak areas</li><li><span>02</span> Mix recall, coding, and speaking practice</li><li><span>03</span> Finish with a readiness report</li></ul>
-          <Link href="/sprint" className="button button-primary">Build my sprint <span>→</span></Link>
+          <div className="sprint-actions"><Link href="/sprint" className="button button-primary">Build my sprint <span>→</span></Link><Link href="/last-minute" className="button button-secondary">I have less time</Link></div>
         </div>
         <div className="timeline-card"><div className="timeline-top"><div><span>DAY 1 OF 2</span><h3>Core knowledge & coding</h3></div><b>6h 30m</b></div><div className="timeline-progress"><i /></div>
           <div className="timeline-list">{sprintItems.slice(0, 4).map((item, index) => <div className="timeline-item" key={item.key}><time>{item.time}</time><span className={index === 0 ? "active-node" : ""} /><div><strong>{item.title}</strong><small>{item.category} · {item.duration} min</small></div>{index === 0 && <b className="now-pill">START HERE</b>}</div>)}</div>
