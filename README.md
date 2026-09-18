@@ -24,6 +24,8 @@ A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and dead
 - RLS-protected practice drafts and entitlement-gated reference solutions
 - Customizable 1-, 2-, 4-, or 8-hour last-minute plans based on weak topics and target role
 - Durable per-user planner settings and task completion, with a useful unsigned local mode
+- Twelve-question frontend diagnostic with server-only answer keys and topic-level scoring
+- Saved attempt history and weak-topic recommendations that prefill the last-minute planner
 - Free/Pro product preview; payment checkout is reserved for the payments phase
 - Supabase schema with per-user RLS policies
 - Supabase browser/server client factories using publishable keys

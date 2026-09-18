@@ -22,7 +22,7 @@ export default function Home() {
           <p>Short lessons, real coding tasks, and interview practice that adapts to your weak spots—not another endless playlist.</p>
           <div className="hero-actions">
             <Link href="/learn/javascript" className="button button-primary">Start learning <span aria-hidden>→</span></Link>
-            <Link href="/practice" className="button button-secondary">Solve coding problems</Link>
+            <Link href="/diagnostic" className="button button-secondary">Take the diagnostic</Link>
           </div>
           <div className="hero-proof">
             <div><strong>20</strong><span>launch lessons</span></div>
