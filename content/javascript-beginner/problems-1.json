@@ -1,0 +1,1075 @@
+[
+  {
+    "slug": "fizzbuzz-variant",
+    "title": "FizzBuzz with custom rules",
+    "topic": "Control flow",
+    "difficulty": 1,
+    "estimated_minutes": 15,
+    "is_premium": false,
+    "position": 7,
+    "summary": "Order your conditions correctly to satisfy overlapping rules.",
+    "prompt": "Write classify(n). Return 'FizzBuzz' when n is divisible by both 3 and 5, 'Fizz' when divisible by 3 only, 'Buzz' when divisible by 5 only, and the number itself (as a number) otherwise. Negative numbers and zero follow the same rules (0 is divisible by everything).",
+    "contract": {
+      "signature": "classify(n: number): string | number",
+      "params": [
+        {
+          "name": "n",
+          "type": "integer"
+        }
+      ],
+      "returns": "'Fizz' | 'Buzz' | 'FizzBuzz' | number"
+    },
+    "constraints": [
+      "n is an integer between -1000 and 1000",
+      "Return the number, not a string, when no rule applies"
+    ],
+    "starter_code": "function classify(n) {\n  // Return 'Fizz', 'Buzz', 'FizzBuzz', or n.\n}",
+    "tests": [
+      {
+        "label": "multiple of 3",
+        "expression": "classify(9)",
+        "expected": "Fizz"
+      },
+      {
+        "label": "multiple of 5",
+        "expression": "classify(10)",
+        "expected": "Buzz"
+      },
+      {
+        "label": "multiple of both",
+        "expression": "classify(30)",
+        "expected": "FizzBuzz"
+      },
+      {
+        "label": "neither",
+        "expression": "classify(7)",
+        "expected": 7
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "zero",
+        "expression": "classify(0)",
+        "expected": "FizzBuzz"
+      },
+      {
+        "label": "negative multiple",
+        "expression": "classify(-15)",
+        "expected": "FizzBuzz"
+      },
+      {
+        "label": "negative plain",
+        "expression": "classify(-4)",
+        "expected": -4
+      },
+      {
+        "label": "large fizz",
+        "expression": "classify(999)",
+        "expected": "Fizz"
+      }
+    ],
+    "hints": [
+      "Check the 'both' case before the single cases, or the single cases will win first.",
+      "n % 15 === 0 is the same as divisible by 3 and 5.",
+      "Return n unchanged (a number) in the final case."
+    ],
+    "solution_code": "function classify(n) {\n  if (n % 15 === 0) return 'FizzBuzz';\n  if (n % 3 === 0) return 'Fizz';\n  if (n % 5 === 0) return 'Buzz';\n  return n;\n}",
+    "explanation": "The only trap is ordering: testing divisibility by 15 first guarantees the combined case is not shadowed by the single checks. The remainder operator works for negatives and zero in the same way, so no special handling is needed.",
+    "complexity": "O(1) time, O(1) space",
+    "sources": [
+      {
+        "title": "Remainder (%)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Remainder",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "sum-of-multiples",
+    "title": "Sum of multiples below a limit",
+    "topic": "Control flow",
+    "difficulty": 1,
+    "estimated_minutes": 15,
+    "is_premium": false,
+    "position": 8,
+    "summary": "Loop with a stopping condition and avoid double counting.",
+    "prompt": "Write sumMultiples(limit, factors). Return the sum of every positive integer below limit that is a multiple of at least one number in factors. Each qualifying integer is counted once even if it matches several factors. If factors is empty or limit is 1 or less, return 0.",
+    "contract": {
+      "signature": "sumMultiples(limit: number, factors: number[]): number",
+      "params": [
+        {
+          "name": "limit",
+          "type": "integer"
+        },
+        {
+          "name": "factors",
+          "type": "positive integer array"
+        }
+      ],
+      "returns": "number"
+    },
+    "constraints": [
+      "1 <= limit <= 100000",
+      "factors contains positive integers"
+    ],
+    "starter_code": "function sumMultiples(limit, factors) {\n  // Sum integers below limit that are multiples of any factor.\n}",
+    "tests": [
+      {
+        "label": "classic 3 and 5 below 10",
+        "expression": "sumMultiples(10, [3, 5])",
+        "expected": 23
+      },
+      {
+        "label": "single factor",
+        "expression": "sumMultiples(20, [7])",
+        "expected": 21
+      },
+      {
+        "label": "no factors",
+        "expression": "sumMultiples(10, [])",
+        "expected": 0
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "overlapping factors counted once",
+        "expression": "sumMultiples(16, [3, 5, 15])",
+        "expected": 60
+      },
+      {
+        "label": "limit too small",
+        "expression": "sumMultiples(1, [2])",
+        "expected": 0
+      },
+      {
+        "label": "factor larger than limit",
+        "expression": "sumMultiples(5, [9])",
+        "expected": 0
+      },
+      {
+        "label": "larger range",
+        "expression": "sumMultiples(1000, [3, 5])",
+        "expected": 233168
+      }
+    ],
+    "hints": [
+      "Loop n from 1 up to (but not including) limit.",
+      "some() answers 'is n divisible by any factor?' in one expression.",
+      "Adding n once per loop iteration avoids double counting automatically."
+    ],
+    "solution_code": "function sumMultiples(limit, factors) {\n  let sum = 0;\n  for (let n = 1; n < limit; n++) {\n    if (factors.some((f) => n % f === 0)) sum += n;\n  }\n  return sum;\n}",
+    "explanation": "Iterating candidates rather than multiples of each factor sidesteps the double-counting problem: each n is added at most once. The loop bound is strict (< limit) as the statement requires.",
+    "complexity": "O(limit × factors.length) time, O(1) space"
+  },
+  {
+    "slug": "validate-username",
+    "title": "Validate a username",
+    "topic": "Control flow",
+    "difficulty": 1,
+    "estimated_minutes": 18,
+    "is_premium": false,
+    "position": 9,
+    "summary": "Apply several rules with guard clauses and return the first failure.",
+    "prompt": "Write validateUsername(name). Return null when the username is valid, otherwise return the first failing rule's message, checked in this order: 'Required' when name is not a string or is empty after trimming; 'Too short' when fewer than 3 characters; 'Too long' when more than 16 characters; 'Invalid characters' when it contains anything other than letters, digits, or underscores; 'Must start with a letter' when the first character is not a letter. Do not trim the name before the length or character checks, only for the 'Required' check.",
+    "contract": {
+      "signature": "validateUsername(name: unknown): string | null",
+      "params": [
+        {
+          "name": "name",
+          "type": "any"
+        }
+      ],
+      "returns": "error message or null"
+    },
+    "constraints": [
+      "Check rules in the exact order given",
+      "Letters are a–z and A–Z only"
+    ],
+    "starter_code": "function validateUsername(name) {\n  // Return null when valid, otherwise the first failing message.\n}",
+    "tests": [
+      {
+        "label": "valid",
+        "expression": "validateUsername('ravi_07')",
+        "expected": null
+      },
+      {
+        "label": "empty",
+        "expression": "validateUsername('   ')",
+        "expected": "Required"
+      },
+      {
+        "label": "too short",
+        "expression": "validateUsername('ab')",
+        "expected": "Too short"
+      },
+      {
+        "label": "bad characters",
+        "expression": "validateUsername('ravi-07')",
+        "expected": "Invalid characters"
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "not a string",
+        "expression": "validateUsername(42)",
+        "expected": "Required"
+      },
+      {
+        "label": "too long",
+        "expression": "validateUsername('abcdefghijklmnopq')",
+        "expected": "Too long"
+      },
+      {
+        "label": "starts with digit",
+        "expression": "validateUsername('7ravi')",
+        "expected": "Must start with a letter"
+      },
+      {
+        "label": "starts with underscore",
+        "expression": "validateUsername('_ravi')",
+        "expected": "Must start with a letter"
+      },
+      {
+        "label": "exactly 16 chars",
+        "expression": "validateUsername('abcdefghijklmnop')",
+        "expected": null
+      }
+    ],
+    "hints": [
+      "typeof name !== 'string' handles non-strings before you call any string method.",
+      "A regular expression such as /^[A-Za-z0-9_]+$/ tests allowed characters.",
+      "Order matters: return as soon as a rule fails."
+    ],
+    "solution_code": "function validateUsername(name) {\n  if (typeof name !== 'string' || name.trim() === '') return 'Required';\n  if (name.length < 3) return 'Too short';\n  if (name.length > 16) return 'Too long';\n  if (!/^[A-Za-z0-9_]+$/.test(name)) return 'Invalid characters';\n  if (!/^[A-Za-z]/.test(name)) return 'Must start with a letter';\n  return null;\n}",
+    "explanation": "Each rule is a guard clause that returns immediately, so the function reads as a checklist. The type check comes first because calling trim on a non-string would throw.",
+    "complexity": "O(n) time in the length of the name, O(1) space"
+  },
+  {
+    "slug": "compose-greeting",
+    "title": "Compose a greeting",
+    "topic": "Functions",
+    "difficulty": 1,
+    "estimated_minutes": 15,
+    "is_premium": false,
+    "position": 10,
+    "summary": "Build small functions and combine them.",
+    "prompt": "Write three functions. capitalize(word) returns the word with its first character upper-cased and the rest unchanged (empty string stays empty). exclaim(text) appends '!'. greet(name) returns 'Hello, ' followed by capitalize(name) followed by '!' by using the other two functions. Then write compose(f, g) that returns a new function h where h(x) equals f(g(x)).",
+    "contract": {
+      "signature": "capitalize(word: string): string; exclaim(text: string): string; greet(name: string): string; compose(f, g): (x) => any",
+      "params": [],
+      "returns": "see each function"
+    },
+    "constraints": [
+      "greet must call capitalize and exclaim rather than building the string from scratch",
+      "compose returns a function"
+    ],
+    "starter_code": "function capitalize(word) {}\n\nfunction exclaim(text) {}\n\nfunction greet(name) {}\n\nfunction compose(f, g) {}",
+    "tests": [
+      {
+        "label": "capitalize",
+        "expression": "capitalize('asha')",
+        "expected": "Asha"
+      },
+      {
+        "label": "greet",
+        "expression": "greet('asha')",
+        "expected": "Hello, Asha!"
+      },
+      {
+        "label": "compose order",
+        "expression": "compose(exclaim, capitalize)('go')",
+        "expected": "Go!"
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "capitalize empty",
+        "expression": "capitalize('')",
+        "expected": ""
+      },
+      {
+        "label": "capitalize keeps rest",
+        "expression": "capitalize('mIRA')",
+        "expected": "MIRA"
+      },
+      {
+        "label": "compose is a function",
+        "expression": "typeof compose(exclaim, capitalize)",
+        "expected": "function"
+      },
+      {
+        "label": "compose with numbers",
+        "expression": "compose((n) => n * 2, (n) => n + 1)(4)",
+        "expected": 10
+      }
+    ],
+    "hints": [
+      "word[0] is undefined for an empty string; guard for that.",
+      "greet can be written as exclaim('Hello, ' + capitalize(name)).",
+      "compose returns (x) => f(g(x)); g runs first."
+    ],
+    "solution_code": "function capitalize(word) {\n  if (!word) return '';\n  return word[0].toUpperCase() + word.slice(1);\n}\n\nfunction exclaim(text) {\n  return `${text}!`;\n}\n\nfunction greet(name) {\n  return exclaim(`Hello, ${capitalize(name)}`);\n}\n\nfunction compose(f, g) {\n  return (x) => f(g(x));\n}",
+    "explanation": "Small pure functions are easy to test alone and to combine. compose demonstrates returning a function: the inner arrow closes over f and g and applies g first, then f.",
+    "complexity": "O(n) in the string length for capitalize; O(1) otherwise"
+  },
+  {
+    "slug": "average-of-arguments",
+    "title": "Average of any number of arguments",
+    "topic": "Functions",
+    "difficulty": 1,
+    "estimated_minutes": 12,
+    "is_premium": false,
+    "position": 11,
+    "summary": "Use a rest parameter and a default value.",
+    "prompt": "Write average(precision = 2, ...values). Return the arithmetic mean of values rounded to precision decimal places, as a number. If no values are given, return 0. Passing undefined as the first argument must use the default precision of 2.",
+    "contract": {
+      "signature": "average(precision?: number, ...values: number[]): number",
+      "params": [
+        {
+          "name": "precision",
+          "type": "integer, default 2"
+        },
+        {
+          "name": "values",
+          "type": "numbers"
+        }
+      ],
+      "returns": "number"
+    },
+    "constraints": [
+      "Return a number, not a string",
+      "0 <= precision <= 6"
+    ],
+    "starter_code": "function average(precision = 2, ...values) {\n  // Return the mean rounded to precision decimals.\n}",
+    "tests": [
+      {
+        "label": "basic",
+        "expression": "average(2, 1, 2, 4)",
+        "expected": 2.33
+      },
+      {
+        "label": "default precision",
+        "expression": "average(undefined, 1, 2)",
+        "expected": 1.5
+      },
+      {
+        "label": "no values",
+        "expression": "average(2)",
+        "expected": 0
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "zero precision",
+        "expression": "average(0, 1, 2, 4)",
+        "expected": 2
+      },
+      {
+        "label": "single value",
+        "expression": "average(3, 7)",
+        "expected": 7
+      },
+      {
+        "label": "returns a number",
+        "expression": "typeof average(1, 3, 4)",
+        "expected": "number"
+      },
+      {
+        "label": "negative values",
+        "expression": "average(1, -1, -2)",
+        "expected": -1.5
+      }
+    ],
+    "hints": [
+      "values is a real array, so reduce works.",
+      "Number(x.toFixed(p)) converts the rounded string back to a number.",
+      "Guard for values.length === 0 before dividing."
+    ],
+    "solution_code": "function average(precision = 2, ...values) {\n  if (values.length === 0) return 0;\n  const mean = values.reduce((sum, n) => sum + n, 0) / values.length;\n  return Number(mean.toFixed(precision));\n}",
+    "explanation": "The default applies when the first argument is omitted or undefined, and the rest parameter gathers everything after it. toFixed produces a string, so the result is converted back to a number as the contract requires.",
+    "complexity": "O(n) time, O(1) extra space"
+  },
+  {
+    "slug": "make-multiplier",
+    "title": "Make a multiplier (and a counter)",
+    "topic": "Functions",
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "is_premium": false,
+    "position": 12,
+    "summary": "Return configured functions that remember their settings.",
+    "prompt": "Write makeMultiplier(factor) that returns a function multiplying its argument by factor. Then write makeCounter(start = 0) that returns an object with two methods: next() returns the current value and then increases it by 1, and reset() sets the value back to start. Counters created separately must not share state.",
+    "contract": {
+      "signature": "makeMultiplier(factor: number): (n: number) => number; makeCounter(start?: number): { next(): number; reset(): void }",
+      "params": [],
+      "returns": "see each function"
+    },
+    "constraints": [
+      "Do not use global variables for the counter state"
+    ],
+    "starter_code": "function makeMultiplier(factor) {}\n\nfunction makeCounter(start = 0) {}",
+    "tests": [
+      {
+        "label": "multiplier",
+        "expression": "makeMultiplier(3)(4)",
+        "expected": 12
+      },
+      {
+        "label": "counter sequence",
+        "expression": "(() => { const c = makeCounter(); return [c.next(), c.next(), c.next()]; })()",
+        "expected": [
+          0,
+          1,
+          2
+        ]
+      },
+      {
+        "label": "counter reset",
+        "expression": "(() => { const c = makeCounter(5); c.next(); c.reset(); return c.next(); })()",
+        "expected": 5
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "independent counters",
+        "expression": "(() => { const a = makeCounter(); const b = makeCounter(10); a.next(); a.next(); return [a.next(), b.next()]; })()",
+        "expected": [
+          2,
+          10
+        ]
+      },
+      {
+        "label": "independent multipliers",
+        "expression": "(() => { const d = makeMultiplier(2); const t = makeMultiplier(3); return [d(5), t(5)]; })()",
+        "expected": [
+          10,
+          15
+        ]
+      },
+      {
+        "label": "multiplier with zero",
+        "expression": "makeMultiplier(0)(99)",
+        "expected": 0
+      }
+    ],
+    "hints": [
+      "The returned function closes over factor.",
+      "Keep the counter's current value in a let inside makeCounter, not on the returned object, so it is private.",
+      "reset must restore the original start, so keep start unchanged."
+    ],
+    "solution_code": "function makeMultiplier(factor) {\n  return (n) => n * factor;\n}\n\nfunction makeCounter(start = 0) {\n  let current = start;\n  return {\n    next() {\n      const value = current;\n      current += 1;\n      return value;\n    },\n    reset() {\n      current = start;\n    },\n  };\n}",
+    "explanation": "Each call to makeCounter creates a new scope with its own current variable, which both methods close over. Nothing outside can touch it, which is the classic closure-based privacy pattern.",
+    "complexity": "O(1) per operation"
+  },
+  {
+    "slug": "count-words",
+    "title": "Count words with an object",
+    "topic": "Objects",
+    "difficulty": 1,
+    "estimated_minutes": 15,
+    "is_premium": false,
+    "position": 13,
+    "summary": "Use an object as a tally with bracket notation.",
+    "prompt": "Write countWords(text). Split the text on any whitespace, ignore empty pieces, lower-case each word, strip leading and trailing punctuation from the set . , ! ? ; : and return a plain object mapping each word to how many times it appears. Return an empty object for empty or whitespace-only input.",
+    "contract": {
+      "signature": "countWords(text: string): Record<string, number>",
+      "params": [
+        {
+          "name": "text",
+          "type": "string"
+        }
+      ],
+      "returns": "object of word counts"
+    },
+    "constraints": [
+      "Keys are lower-case words with surrounding punctuation removed",
+      "Use a plain object, not a Map"
+    ],
+    "starter_code": "function countWords(text) {\n  // Return { word: count, ... }.\n}",
+    "tests": [
+      {
+        "label": "simple",
+        "expression": "countWords('tea tea cake')",
+        "expected": {
+          "tea": 2,
+          "cake": 1
+        }
+      },
+      {
+        "label": "case and punctuation",
+        "expression": "countWords('Go, go, GO!')",
+        "expected": {
+          "go": 3
+        }
+      },
+      {
+        "label": "empty",
+        "expression": "countWords('   ')",
+        "expected": {}
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "multiple spaces and newlines",
+        "expression": "countWords('a  b\\nb   a')",
+        "expected": {
+          "a": 2,
+          "b": 2
+        }
+      },
+      {
+        "label": "inner punctuation kept",
+        "expression": "countWords(\"don't stop, don't\")",
+        "expected": {
+          "don't": 2,
+          "stop": 1
+        }
+      },
+      {
+        "label": "word that is a prototype key",
+        "expression": "countWords('constructor constructor')",
+        "expected": {
+          "constructor": 2
+        }
+      }
+    ],
+    "hints": [
+      "text.trim().split(/\\s+/) splits on runs of whitespace.",
+      "A regex like /^[.,!?;:]+|[.,!?;:]+$/g removes punctuation at the ends only.",
+      "Use (counts[word] ?? 0) + 1 — but beware inherited keys like 'constructor'; Object.hasOwn or a null-prototype object avoids surprises."
+    ],
+    "solution_code": "function countWords(text) {\n  const counts = Object.create(null);\n  const words = text.trim() ? text.trim().split(/\\s+/) : [];\n  for (const raw of words) {\n    const word = raw.toLowerCase().replace(/^[.,!?;:]+|[.,!?;:]+$/g, '');\n    if (!word) continue;\n    counts[word] = (Object.hasOwn(counts, word) ? counts[word] : 0) + 1;\n  }\n  return { ...counts };\n}",
+    "explanation": "An object works as a tally when you read the current value with a fallback and write it back. Words such as 'constructor' collide with inherited properties on a normal object, so the solution tallies in a null-prototype object and spreads it into a plain object at the end.",
+    "complexity": "O(n) time in the number of characters, O(k) space for k distinct words"
+  },
+  {
+    "slug": "bank-account-object",
+    "title": "Bank account object",
+    "topic": "Objects",
+    "difficulty": 2,
+    "estimated_minutes": 20,
+    "is_premium": false,
+    "position": 14,
+    "summary": "Methods that share state through this and survive being detached.",
+    "prompt": "Write createAccount(owner, opening = 0) returning an object with: balance (a number), deposit(amount) which adds a positive amount and returns the new balance, withdraw(amount) which subtracts a positive amount that does not exceed the balance and returns the new balance, and statement() returning `${owner}: ${balance}`. deposit and withdraw must throw a RangeError for non-positive amounts and withdraw must throw a RangeError for insufficient funds. The methods must keep working when extracted from the object, for example const w = account.withdraw; w(10).",
+    "contract": {
+      "signature": "createAccount(owner: string, opening?: number): { balance: number; deposit(n): number; withdraw(n): number; statement(): string }",
+      "params": [],
+      "returns": "account object"
+    },
+    "constraints": [
+      "Throw RangeError for invalid amounts",
+      "Detached methods must still operate on the same account"
+    ],
+    "starter_code": "function createAccount(owner, opening = 0) {\n  // Return an account object.\n}",
+    "tests": [
+      {
+        "label": "deposit",
+        "expression": "createAccount('Ann', 100).deposit(50)",
+        "expected": 150
+      },
+      {
+        "label": "withdraw",
+        "expression": "createAccount('Ann', 100).withdraw(30)",
+        "expected": 70
+      },
+      {
+        "label": "statement",
+        "expression": "(() => { const a = createAccount('Ann', 10); a.deposit(5); return a.statement(); })()",
+        "expected": "Ann: 15"
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "detached method keeps state",
+        "expression": "(() => { const a = createAccount('Ann', 100); const w = a.withdraw; w(40); return a.balance; })()",
+        "expected": 60
+      },
+      {
+        "label": "insufficient funds throws RangeError",
+        "expression": "(() => { try { createAccount('Ann', 10).withdraw(20); return 'no throw'; } catch (e) { return e.name; } })()",
+        "expected": "RangeError"
+      },
+      {
+        "label": "non-positive deposit throws RangeError",
+        "expression": "(() => { try { createAccount('Ann').deposit(0); return 'no throw'; } catch (e) { return e.name; } })()",
+        "expected": "RangeError"
+      },
+      {
+        "label": "balance property updates",
+        "expression": "(() => { const a = createAccount('Ann'); a.deposit(25); return a.balance; })()",
+        "expected": 25
+      }
+    ],
+    "hints": [
+      "A detached call has no this, so either use arrow functions that close over a local variable, or bind each method.",
+      "Keep the balance in a closure variable and expose it through a getter, or update both.",
+      "Validate the amount before changing anything."
+    ],
+    "solution_code": "function createAccount(owner, opening = 0) {\n  let balance = opening;\n  const account = {\n    get balance() {\n      return balance;\n    },\n    deposit: (amount) => {\n      if (!(amount > 0)) throw new RangeError('Deposit must be positive');\n      balance += amount;\n      return balance;\n    },\n    withdraw: (amount) => {\n      if (!(amount > 0)) throw new RangeError('Withdrawal must be positive');\n      if (amount > balance) throw new RangeError('Insufficient funds');\n      balance -= amount;\n      return balance;\n    },\n    statement: () => `${owner}: ${balance}`,\n  };\n  return account;\n}",
+    "explanation": "Because the methods are arrow functions closing over a private balance variable, they do not depend on this at all, so detaching them is safe. A getter exposes balance as a read-only property that always reflects the closure value.",
+    "complexity": "O(1) per operation"
+  },
+  {
+    "slug": "extract-address",
+    "title": "Extract an address safely",
+    "topic": "Objects",
+    "difficulty": 2,
+    "estimated_minutes": 15,
+    "is_premium": true,
+    "position": 15,
+    "summary": "Nested destructuring with defaults and optional chaining on incomplete records.",
+    "prompt": "Write formatAddress(user). user may be missing entirely or missing any nested part. Read user.profile.address.{line1, city, postcode, country}. Return a single string joining the non-empty parts of line1, city, postcode with ', ' followed by ' (' + country + ')' where country defaults to 'IN'. If no address parts are available at all, return 'No address'.",
+    "contract": {
+      "signature": "formatAddress(user?: object): string",
+      "params": [
+        {
+          "name": "user",
+          "type": "object or undefined"
+        }
+      ],
+      "returns": "string"
+    },
+    "constraints": [
+      "Must not throw for undefined input or missing nested objects",
+      "Empty strings count as missing"
+    ],
+    "starter_code": "function formatAddress(user) {\n  // Return the formatted address or 'No address'.\n}",
+    "tests": [
+      {
+        "label": "full address",
+        "expression": "formatAddress({ profile: { address: { line1: '12 MG Road', city: 'Pune', postcode: '411001', country: 'IN' } } })",
+        "expected": "12 MG Road, Pune, 411001 (IN)"
+      },
+      {
+        "label": "default country",
+        "expression": "formatAddress({ profile: { address: { city: 'Pune' } } })",
+        "expected": "Pune (IN)"
+      },
+      {
+        "label": "no user",
+        "expression": "formatAddress()",
+        "expected": "No address"
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "missing profile",
+        "expression": "formatAddress({})",
+        "expected": "No address"
+      },
+      {
+        "label": "null address",
+        "expression": "formatAddress({ profile: { address: null } })",
+        "expected": "No address"
+      },
+      {
+        "label": "empty strings ignored",
+        "expression": "formatAddress({ profile: { address: { line1: '', city: 'Mumbai', postcode: '', country: 'IN' } } })",
+        "expected": "Mumbai (IN)"
+      },
+      {
+        "label": "other country",
+        "expression": "formatAddress({ profile: { address: { line1: '1 Rue', city: 'Paris', country: 'FR' } } })",
+        "expected": "1 Rue, Paris (FR)"
+      }
+    ],
+    "hints": [
+      "const { line1 = '', city = '', postcode = '', country = 'IN' } = user?.profile?.address ?? {};",
+      "Collect the parts in an array and filter(Boolean) before joining.",
+      "Decide on 'No address' by checking whether the filtered parts array is empty."
+    ],
+    "solution_code": "function formatAddress(user) {\n  const { line1 = '', city = '', postcode = '', country = 'IN' } = user?.profile?.address ?? {};\n  const parts = [line1, city, postcode].filter(Boolean);\n  if (parts.length === 0) return 'No address';\n  return `${parts.join(', ')} (${country})`;\n}",
+    "explanation": "Optional chaining walks the nested path without throwing, ?? supplies an empty object so destructuring never fails, and per-key defaults handle missing fields. Filtering out empty strings before joining handles partial records.",
+    "complexity": "O(1)"
+  },
+  {
+    "slug": "queue-simulation",
+    "title": "Queue simulation",
+    "topic": "Arrays",
+    "difficulty": 1,
+    "estimated_minutes": 15,
+    "is_premium": false,
+    "position": 16,
+    "summary": "Apply push, shift, and splice and report what was removed.",
+    "prompt": "Write processQueue(initial, operations). Start with a copy of initial (do not mutate it). Each operation is an array: ['enqueue', item] adds to the end; ['dequeue'] removes from the front; ['remove', item] removes the first occurrence of item if present. Return an object { queue, removed } where queue is the final array and removed lists every item that was removed by dequeue or remove, in order.",
+    "contract": {
+      "signature": "processQueue(initial: any[], operations: any[][]): { queue: any[]; removed: any[] }",
+      "params": [],
+      "returns": "{ queue, removed }"
+    },
+    "constraints": [
+      "initial must not be mutated",
+      "dequeue on an empty queue does nothing"
+    ],
+    "starter_code": "function processQueue(initial, operations) {\n  // Return { queue, removed }.\n}",
+    "tests": [
+      {
+        "label": "enqueue and dequeue",
+        "expression": "processQueue(['a'], [['enqueue', 'b'], ['dequeue']])",
+        "expected": {
+          "queue": [
+            "b"
+          ],
+          "removed": [
+            "a"
+          ]
+        }
+      },
+      {
+        "label": "remove middle",
+        "expression": "processQueue(['a', 'b', 'c'], [['remove', 'b']])",
+        "expected": {
+          "queue": [
+            "a",
+            "c"
+          ],
+          "removed": [
+            "b"
+          ]
+        }
+      },
+      {
+        "label": "dequeue empty",
+        "expression": "processQueue([], [['dequeue']])",
+        "expected": {
+          "queue": [],
+          "removed": []
+        }
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "initial not mutated",
+        "expression": "(() => { const init = ['x', 'y']; processQueue(init, [['dequeue']]); return init; })()",
+        "expected": [
+          "x",
+          "y"
+        ]
+      },
+      {
+        "label": "remove missing item",
+        "expression": "processQueue(['a'], [['remove', 'z']])",
+        "expected": {
+          "queue": [
+            "a"
+          ],
+          "removed": []
+        }
+      },
+      {
+        "label": "remove first occurrence only",
+        "expression": "processQueue(['a', 'b', 'a'], [['remove', 'a']])",
+        "expected": {
+          "queue": [
+            "b",
+            "a"
+          ],
+          "removed": [
+            "a"
+          ]
+        }
+      },
+      {
+        "label": "mixed sequence",
+        "expression": "processQueue([1, 2], [['enqueue', 3], ['dequeue'], ['remove', 3], ['enqueue', 4]])",
+        "expected": {
+          "queue": [
+            2,
+            4
+          ],
+          "removed": [
+            1,
+            3
+          ]
+        }
+      }
+    ],
+    "hints": [
+      "Start with const queue = [...initial].",
+      "shift() returns undefined on an empty array; only record it when the queue had items.",
+      "indexOf then splice(index, 1) removes one occurrence; splice returns the removed items."
+    ],
+    "solution_code": "function processQueue(initial, operations) {\n  const queue = [...initial];\n  const removed = [];\n  for (const [op, item] of operations) {\n    if (op === 'enqueue') {\n      queue.push(item);\n    } else if (op === 'dequeue') {\n      if (queue.length > 0) removed.push(queue.shift());\n    } else if (op === 'remove') {\n      const index = queue.indexOf(item);\n      if (index !== -1) removed.push(...queue.splice(index, 1));\n    }\n  }\n  return { queue, removed };\n}",
+    "explanation": "Copying first protects the caller's array. Each operation maps to one mutating method, and the return values of shift and splice are what feed the removed list.",
+    "complexity": "O(n × m) worst case for m operations on a queue of n items"
+  },
+  {
+    "slug": "cart-summary",
+    "title": "Cart summary",
+    "topic": "Arrays",
+    "difficulty": 2,
+    "estimated_minutes": 20,
+    "is_premium": false,
+    "position": 17,
+    "summary": "Chain filter, map, and reduce on an order list.",
+    "prompt": "Write summarize(items). Each item is { name, price, qty, taxable }. Ignore items with qty of 0 or less. Return { count, subtotal, tax, total, names } where count is the number of items kept, subtotal is the sum of price × qty, tax is 18% of the subtotal of taxable items only, total is subtotal + tax, and names is an array of the kept item names in original order. Round subtotal, tax, and total to 2 decimals as numbers.",
+    "contract": {
+      "signature": "summarize(items: Array<{ name: string; price: number; qty: number; taxable: boolean }>): { count: number; subtotal: number; tax: number; total: number; names: string[] }",
+      "params": [],
+      "returns": "summary object"
+    },
+    "constraints": [
+      "Do not mutate items",
+      "Round with 2 decimals; return numbers"
+    ],
+    "starter_code": "function summarize(items) {\n  // Return { count, subtotal, tax, total, names }.\n}",
+    "tests": [
+      {
+        "label": "mixed cart",
+        "expression": "summarize([{ name: 'Tea', price: 40, qty: 2, taxable: true }, { name: 'Cake', price: 120, qty: 1, taxable: false }, { name: 'Water', price: 20, qty: 0, taxable: true }])",
+        "expected": {
+          "count": 2,
+          "subtotal": 200,
+          "tax": 14.4,
+          "total": 214.4,
+          "names": [
+            "Tea",
+            "Cake"
+          ]
+        }
+      },
+      {
+        "label": "empty cart",
+        "expression": "summarize([])",
+        "expected": {
+          "count": 0,
+          "subtotal": 0,
+          "tax": 0,
+          "total": 0,
+          "names": []
+        }
+      },
+      {
+        "label": "single taxable item",
+        "expression": "summarize([{ name: 'Tea', price: 100, qty: 1, taxable: true }])",
+        "expected": {
+          "count": 1,
+          "subtotal": 100,
+          "tax": 18,
+          "total": 118,
+          "names": [
+            "Tea"
+          ]
+        }
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "all taxable",
+        "expression": "summarize([{ name: 'A', price: 10, qty: 1, taxable: true }, { name: 'B', price: 5, qty: 2, taxable: true }])",
+        "expected": {
+          "count": 2,
+          "subtotal": 20,
+          "tax": 3.6,
+          "total": 23.6,
+          "names": [
+            "A",
+            "B"
+          ]
+        }
+      },
+      {
+        "label": "rounding",
+        "expression": "summarize([{ name: 'A', price: 0.1, qty: 3, taxable: true }])",
+        "expected": {
+          "count": 1,
+          "subtotal": 0.3,
+          "tax": 0.05,
+          "total": 0.35,
+          "names": [
+            "A"
+          ]
+        }
+      },
+      {
+        "label": "negative qty ignored",
+        "expression": "summarize([{ name: 'A', price: 10, qty: -1, taxable: true }])",
+        "expected": {
+          "count": 0,
+          "subtotal": 0,
+          "tax": 0,
+          "total": 0,
+          "names": []
+        }
+      },
+      {
+        "label": "input not mutated",
+        "expression": "(() => { const items = [{ name: 'A', price: 1, qty: 1, taxable: false }]; summarize(items); return items.length; })()",
+        "expected": 1
+      }
+    ],
+    "hints": [
+      "Filter once into a kept array and reuse it for count, names, and totals.",
+      "Compute the taxable subtotal separately with another filter/reduce.",
+      "A helper round2 = (n) => Math.round(n * 100) / 100 keeps results numeric."
+    ],
+    "solution_code": "function summarize(items) {\n  const round2 = (n) => Math.round(n * 100) / 100;\n  const kept = items.filter((item) => item.qty > 0);\n  const subtotal = kept.reduce((sum, item) => sum + item.price * item.qty, 0);\n  const taxableSubtotal = kept.filter((item) => item.taxable).reduce((sum, item) => sum + item.price * item.qty, 0);\n  const tax = round2(taxableSubtotal * 0.18);\n  return {\n    count: kept.length,\n    subtotal: round2(subtotal),\n    tax,\n    total: round2(round2(subtotal) + tax),\n    names: kept.map((item) => item.name),\n  };\n}",
+    "explanation": "filter selects, map transforms, reduce combines. Computing the kept list once and deriving everything from it keeps the function readable, and rounding at the end avoids accumulating float error in the middle.",
+    "complexity": "O(n) time, O(n) space"
+  },
+  {
+    "slug": "top-scores",
+    "title": "Top scores with tie-breaks",
+    "topic": "Arrays",
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "is_premium": true,
+    "position": 18,
+    "summary": "A multi-key comparator that must not mutate the input.",
+    "prompt": "Write topScores(players, n). players is an array of { name, score }. Return a new array of the top n players sorted by score descending, then by name ascending (case-insensitive) for equal scores. If n is larger than the number of players, return all of them. The input array must not be reordered.",
+    "contract": {
+      "signature": "topScores(players: Array<{ name: string; score: number }>, n: number): Array<{ name: string; score: number }>",
+      "params": [],
+      "returns": "new sorted array of length min(n, players.length)"
+    },
+    "constraints": [
+      "Do not mutate players",
+      "Names compare case-insensitively"
+    ],
+    "starter_code": "function topScores(players, n) {\n  // Return the top n players.\n}",
+    "tests": [
+      {
+        "label": "top two",
+        "expression": "topScores([{ name: 'Bo', score: 80 }, { name: 'Al', score: 95 }, { name: 'Cy', score: 80 }], 2)",
+        "expected": [
+          {
+            "name": "Al",
+            "score": 95
+          },
+          {
+            "name": "Bo",
+            "score": 80
+          }
+        ]
+      },
+      {
+        "label": "n larger than list",
+        "expression": "topScores([{ name: 'Zed', score: 1 }], 5)",
+        "expected": [
+          {
+            "name": "Zed",
+            "score": 1
+          }
+        ]
+      },
+      {
+        "label": "tie broken by name",
+        "expression": "topScores([{ name: 'Zed', score: 50 }, { name: 'Amy', score: 50 }], 1)",
+        "expected": [
+          {
+            "name": "Amy",
+            "score": 50
+          }
+        ]
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "input not reordered",
+        "expression": "(() => { const p = [{ name: 'b', score: 1 }, { name: 'a', score: 2 }]; topScores(p, 2); return p.map((x) => x.name); })()",
+        "expected": [
+          "b",
+          "a"
+        ]
+      },
+      {
+        "label": "case-insensitive tie-break",
+        "expression": "topScores([{ name: 'bob', score: 5 }, { name: 'Amy', score: 5 }], 2).map((p) => p.name)",
+        "expected": [
+          "Amy",
+          "bob"
+        ]
+      },
+      {
+        "label": "n of zero",
+        "expression": "topScores([{ name: 'A', score: 1 }], 0)",
+        "expected": []
+      },
+      {
+        "label": "three-way tie",
+        "expression": "topScores([{ name: 'c', score: 9 }, { name: 'a', score: 9 }, { name: 'b', score: 9 }], 3).map((p) => p.name)",
+        "expected": [
+          "a",
+          "b",
+          "c"
+        ]
+      }
+    ],
+    "hints": [
+      "toSorted (or [...players].sort) keeps the original untouched.",
+      "b.score - a.score sorts descending; use || to fall through to the name comparison when it is 0.",
+      "a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }) compares case-insensitively; slice(0, n) takes the top n."
+    ],
+    "solution_code": "function topScores(players, n) {\n  return [...players]\n    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))\n    .slice(0, Math.max(0, n));\n}",
+    "explanation": "The comparator returns the score difference first; when that is 0 the || operator falls through to the name comparison. Copying with spread before sort preserves the caller's order, and slice handles n beyond the length naturally.",
+    "complexity": "O(n log n) time, O(n) space"
+  },
+  {
+    "slug": "title-case",
+    "title": "Title case a sentence",
+    "topic": "Strings",
+    "difficulty": 1,
+    "estimated_minutes": 12,
+    "is_premium": false,
+    "position": 19,
+    "summary": "split, map, slice, and join working together.",
+    "prompt": "Write titleCase(text). Return the text with the first letter of every word upper-cased and the remaining letters lower-cased. Words are separated by single spaces in the output regardless of how many spaces separated them in the input. Leading and trailing whitespace is removed. Empty input returns an empty string.",
+    "contract": {
+      "signature": "titleCase(text: string): string",
+      "params": [
+        {
+          "name": "text",
+          "type": "string"
+        }
+      ],
+      "returns": "string"
+    },
+    "constraints": [
+      "Collapse runs of whitespace to a single space"
+    ],
+    "starter_code": "function titleCase(text) {\n  // Return the title-cased sentence.\n}",
+    "tests": [
+      {
+        "label": "basic",
+        "expression": "titleCase('learn javascript well')",
+        "expected": "Learn Javascript Well"
+      },
+      {
+        "label": "mixed case",
+        "expression": "titleCase('hELLO wORLD')",
+        "expected": "Hello World"
+      },
+      {
+        "label": "empty",
+        "expression": "titleCase('')",
+        "expected": ""
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "extra whitespace",
+        "expression": "titleCase('  many   spaces here ')",
+        "expected": "Many Spaces Here"
+      },
+      {
+        "label": "single letter words",
+        "expression": "titleCase('a b c')",
+        "expected": "A B C"
+      },
+      {
+        "label": "numbers untouched",
+        "expression": "titleCase('room 42b')",
+        "expected": "Room 42b"
+      }
+    ],
+    "hints": [
+      "trim() then split(/\\s+/) gives clean words; an empty string needs a guard because ''.split gives [''].",
+      "word[0].toUpperCase() + word.slice(1).toLowerCase() handles each word.",
+      "join(' ') rebuilds the sentence."
+    ],
+    "solution_code": "function titleCase(text) {\n  const trimmed = text.trim();\n  if (!trimmed) return '';\n  return trimmed\n    .split(/\\s+/)\n    .map((word) => word[0].toUpperCase() + word.slice(1).toLowerCase())\n    .join(' ');\n}",
+    "explanation": "The pipeline is split → map → join. Splitting on a whitespace regex normalises spacing for free, and the empty-string guard avoids calling toUpperCase on undefined.",
+    "complexity": "O(n) time and space"
+  }
+]

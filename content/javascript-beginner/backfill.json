@@ -1,0 +1,64 @@
+{
+  "problems": {
+    "reverse-words": {
+      "contract": { "signature": "reverseWords(text: string): string", "params": [{ "name": "text", "type": "string" }], "returns": "words in reverse order joined by single spaces" },
+      "constraints": ["Consecutive whitespace counts as one separator", "Leading and trailing whitespace is ignored"],
+      "hidden_tests": [
+        { "label": "tabs and newlines", "expression": "reverseWords('one\\ttwo\\nthree')", "expected": "three two one" },
+        { "label": "empty string", "expression": "reverseWords('')", "expected": "" },
+        { "label": "only whitespace", "expression": "reverseWords('   ')", "expected": "" },
+        { "label": "punctuation stays attached", "expression": "reverseWords('hello, world!')", "expected": "world! hello," }
+      ] },
+    "valid-palindrome": {
+      "contract": { "signature": "isPalindrome(text: string): boolean", "params": [{ "name": "text", "type": "string" }], "returns": "boolean" },
+      "constraints": ["Ignore non-alphanumeric characters and case"],
+      "hidden_tests": [
+        { "label": "digits", "expression": "isPalindrome('12321')", "expected": true },
+        { "label": "mixed case", "expression": "isPalindrome('NoOn')", "expected": true },
+        { "label": "near miss", "expression": "isPalindrome('abca')", "expected": false },
+        { "label": "single character", "expression": "isPalindrome('x')", "expected": true }
+      ] },
+    "group-by-key": {
+      "contract": { "signature": "groupBy(items: object[], key: string): Record<string, object[]>", "params": [{ "name": "items", "type": "object array" }, { "name": "key", "type": "property name" }], "returns": "object of arrays" },
+      "constraints": ["Preserve input order within each group", "Missing keys group under 'undefined'"],
+      "hidden_tests": [
+        { "label": "numeric values as keys", "expression": "groupBy([{ n: 1 }, { n: 2 }, { n: 1 }], 'n')", "expected": { "1": [{ "n": 1 }, { "n": 1 }], "2": [{ "n": 2 }] } },
+        { "label": "missing key", "expression": "Object.keys(groupBy([{ a: 1 }, { b: 2 }], 'a'))", "expected": ["1", "undefined"] },
+        { "label": "order within group", "expression": "groupBy([{ t: 'x', i: 1 }, { t: 'x', i: 2 }], 't').x.map((o) => o.i)", "expected": [1, 2] }
+      ] },
+    "flatten-tree": {
+      "contract": { "signature": "flattenTree(nodes: Array<{ id: string; children?: Node[] }>): string[]", "params": [{ "name": "nodes", "type": "array of nodes" }], "returns": "ids in pre-order depth-first traversal" },
+      "constraints": ["children may be missing or empty"],
+      "hidden_tests": [
+        { "label": "deeply nested", "expression": "flattenTree([{ id: 'a', children: [{ id: 'b', children: [{ id: 'c', children: [{ id: 'd' }] }] }] }])", "expected": ["a", "b", "c", "d"] },
+        { "label": "empty children arrays", "expression": "flattenTree([{ id: 'a', children: [] }, { id: 'b', children: [] }])", "expected": ["a", "b"] },
+        { "label": "siblings after nested", "expression": "flattenTree([{ id: '1', children: [{ id: '1.1' }, { id: '1.2' }] }, { id: '2' }])", "expected": ["1", "1.1", "1.2", "2"] }
+      ] },
+    "implement-debounce": {
+      "contract": { "signature": "debounce(fn: Function, delay: number): Function", "params": [{ "name": "fn", "type": "function" }, { "name": "delay", "type": "milliseconds" }], "returns": "debounced function" },
+      "constraints": ["Only the last call within the window runs", "Latest arguments and this must be used"],
+      "hidden_tests": [
+        { "label": "single call runs once", "expression": "(async () => { let calls = 0; const d = debounce(() => { calls++; }, 15); d(); await new Promise((r) => setTimeout(r, 50)); return calls; })()", "expected": 1 },
+        { "label": "burst collapses to one", "expression": "(async () => { let calls = 0; const d = debounce(() => { calls++; }, 20); d(); d(); d(); await new Promise((r) => setTimeout(r, 60)); return calls; })()", "expected": 1 },
+        { "label": "latest arguments win", "expression": "(async () => { let last; const d = debounce((x) => { last = x; }, 15); d('a'); d('b'); await new Promise((r) => setTimeout(r, 50)); return last; })()", "expected": "b" },
+        { "label": "this preserved", "expression": "(async () => { const o = { v: 3, got: null }; o.run = debounce(function () { this.got = this.v; }, 10); o.run(); await new Promise((r) => setTimeout(r, 40)); return o.got; })()", "expected": 3 }
+      ] },
+    "promise-pool": {
+      "contract": { "signature": "promisePool(tasks: Array<() => Promise<any>>, limit: number): Promise<any[]>", "params": [{ "name": "tasks", "type": "array of promise-returning functions" }, { "name": "limit", "type": "positive integer" }], "returns": "promise of results in input order" },
+      "constraints": ["Never more than limit tasks in flight", "Results keep input order regardless of completion order"],
+      "hidden_tests": [
+        { "label": "results in input order", "expression": "promisePool([() => new Promise((r) => setTimeout(() => r('slow'), 30)), () => Promise.resolve('fast')], 2)", "expected": ["slow", "fast"] },
+        { "label": "respects the limit", "expression": "(async () => { let active = 0, peak = 0; const make = () => () => new Promise((r) => { active++; peak = Math.max(peak, active); setTimeout(() => { active--; r(1); }, 10); }); await promisePool([make(), make(), make(), make(), make()], 2); return peak; })()", "expected": 2 },
+        { "label": "empty tasks", "expression": "promisePool([], 3)", "expected": [] },
+        { "label": "limit larger than tasks", "expression": "promisePool([() => Promise.resolve(1), () => Promise.resolve(2)], 10)", "expected": [1, 2] }
+      ] }
+  },
+  "questions_v2_explanations": {
+    "js-vars-001": "Objects are shared by reference, so a copy of a variable is not a copy of the object.",
+    "js-expressions-001": "Operator precedence decides how an expression groups before it is evaluated.",
+    "js-conversion-001": "Explicit conversions with Number and Boolean follow fixed rules rather than intuition.",
+    "js-equality-001": "Loose and strict equality treat mixed types differently.",
+    "js-closures-001": "A closure keeps a live reference to the variables of the scope it was created in.",
+    "js-async-001": "Promise reactions run as microtasks after the current synchronous work completes."
+  }
+}

@@ -1,0 +1,564 @@
+[
+  {
+    "slug": "destructuring-and-optional-chaining",
+    "module": "objects",
+    "position": 3,
+    "difficulty": 2,
+    "estimated_minutes": 16,
+    "access_level": "pro",
+    "title": "Destructuring & optional chaining",
+    "summary": "Pull values out of objects and arrays in one line, rename and default them, and read nested data that might be missing without crashing.",
+    "objectives": [
+      "Destructure objects and arrays with renames and defaults",
+      "Destructure directly in function parameters",
+      "Use ?. and ?? together to read optional nested data safely"
+    ],
+    "prerequisites": [
+      "object-literals-and-property-access"
+    ],
+    "practice_link": "extract-address",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Unpacking and safe access",
+        "body": "**Object destructuring** matches keys: `const { name, age } = person`. Rename with a colon (`{ name: fullName }`), supply a default with `=` (`{ role = 'viewer' }`), and combine both (`{ role: userRole = 'viewer' }`). Nested patterns unpack deeper levels, and a rest element (`...others`) collects the remaining keys into a new object.\n\n**Array destructuring** matches positions: `const [first, , third] = list` skips the second item, and `[head, ...tail]` splits a list. Swapping two variables is a one-liner: `[a, b] = [b, a]`.\n\nDestructuring works in function parameters, which is the idiomatic way to accept an options object with defaults: `function connect({ host = 'localhost', port = 5432 } = {})`. The trailing `= {}` protects against calling the function with no argument at all.\n\n**Optional chaining** `a?.b` returns `undefined` instead of throwing when `a` is `null` or `undefined`; it also works for calls (`fn?.()`) and brackets (`obj?.[key]`). Pair it with the **nullish coalescing** operator `??` to supply a fallback only for `null`/`undefined`, unlike `||`, which also replaces `0`, `''`, and `false`."
+      },
+      {
+        "type": "example",
+        "title": "Rename, default, nest, rest",
+        "body": "Every feature in one pattern.",
+        "code": "const order = {\n  id: 42,\n  customer: { name: 'Ravi', address: { city: 'Pune' } },\n  items: ['tea', 'biscuits'],\n};\n\nconst {\n  id: orderId,\n  customer: { name, address: { city, country = 'IN' } },\n  ...rest\n} = order;\n\nconsole.log(orderId, name, city, country); // 42 'Ravi' 'Pune' 'IN'\nconsole.log(Object.keys(rest));            // ['items']\n\nconst [firstItem, ...others] = order.items;\nconsole.log(firstItem, others);            // 'tea' ['biscuits']",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Optional chaining with a fallback",
+        "body": "`??` keeps a legitimate `0`; `||` would have replaced it.",
+        "code": "const profile = { stats: { streak: 0 } };\n\nconsole.log(profile.stats?.streak ?? 'no data');   // 0\nconsole.log(profile.stats?.streak || 'no data');   // 'no data'\nconsole.log(profile.badges?.length ?? 0);          // 0\nconsole.log(profile.badges?.[0]);                  // undefined (no throw)",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Destructuring from `undefined` (for example a missing options argument) throws; add `= {}`.\n- Confusing rename syntax: `{ name: fullName }` reads `name` *into* `fullName`, not the other way round.\n- Using `||` for defaults and silently replacing `0` or `''`.\n- Sprinkling `?.` everywhere, which hides real bugs where the value should never be missing."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Expect a snippet mixing `?.`, `??`, and `||` and a request to explain each output. Destructuring in parameters is also a common \"clean this code up\" refactor in live sessions."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Extract an address** combines nested destructuring with defaults and optional chaining on incomplete records."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Destructuring",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Optional chaining (?.)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Optional_chaining",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "creating-and-mutating-arrays",
+    "module": "arrays",
+    "position": 1,
+    "difficulty": 1,
+    "estimated_minutes": 15,
+    "access_level": "free",
+    "title": "Creating & mutating arrays",
+    "summary": "Build arrays, add and remove items at either end, and know which methods change the array in place.",
+    "objectives": [
+      "Use push, pop, shift, unshift and splice correctly",
+      "Tell mutating methods from methods that return a new array",
+      "Copy an array before changing it when the original must stay intact"
+    ],
+    "prerequisites": [
+      "variables-and-types"
+    ],
+    "practice_link": "queue-simulation",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Arrays are ordered, resizable, and mutable",
+        "body": "An array literal `[1, 2, 3]` creates an ordered list with a `length` that grows and shrinks automatically. Indexes start at 0, and reading past the end returns `undefined` rather than throwing.\n\n`push` and `pop` add and remove at the end (fast); `unshift` and `shift` do the same at the start (slower, because every index moves). `splice(start, deleteCount, ...items)` removes and/or inserts anywhere and returns the removed items. `sort` and `reverse` reorder in place. All of these **mutate** the array you call them on.\n\nOther methods return a **new** array and leave the original alone: `slice`, `concat`, `map`, `filter`, and the newer `toSorted`, `toReversed`, `toSpliced`, and `with`. Spread (`[...arr]`) and `Array.from(arr)` make shallow copies.\n\nThe distinction matters because arrays are shared by reference. If two variables point to the same array, mutating through one changes what the other sees. When a function receives an array it should not change, copy first or use a non-mutating method.\n\n`Array.isArray(value)` is the reliable way to check for an array; `typeof [] === 'object'` is not helpful."
+      },
+      {
+        "type": "example",
+        "title": "Ends and middles",
+        "body": "`splice` both removes and inserts. Note what each call returns.",
+        "code": "const queue = ['a', 'b', 'c'];\n\nqueue.push('d');            // returns 4 (new length)\nconst first = queue.shift(); // 'a'\nconsole.log(queue);         // ['b', 'c', 'd']\n\nconst removed = queue.splice(1, 1, 'x', 'y');\nconsole.log(removed);       // ['c']\nconsole.log(queue);         // ['b', 'x', 'y', 'd']",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Mutating versus copying",
+        "body": "`sort` changed `scores`; `toSorted` left `names` alone.",
+        "code": "const scores = [40, 9, 100];\nscores.sort();\nconsole.log(scores); // [100, 40, 9]  (string order!)\n\nconst names = ['Zed', 'amy', 'Bo'];\nconst sorted = names.toSorted((a, b) => a.localeCompare(b));\nconsole.log(names);  // ['Zed', 'amy', 'Bo']\nconsole.log(sorted); // ['amy', 'Bo', 'Zed']",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Expecting `push` to return the array (it returns the new length).\n- Calling `sort()` on numbers without a comparator and getting lexicographic order.\n- Mutating an array received as an argument and surprising the caller.\n- Using `delete arr[i]`, which leaves a hole instead of removing the slot."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"Which array methods mutate?\" is a quick screening question. Live-coding tasks often silently test whether you avoid mutating input, so mention it: \"I'll copy the array so the original stays intact.\""
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Queue simulation** is all `push`, `shift`, and `splice`, with a twist about returning the removed items."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Array — JavaScript reference (copying vs mutating methods)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array#copying_methods_and_mutating_methods",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Array.prototype.splice()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/splice",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "map-filter-reduce",
+    "module": "arrays",
+    "position": 2,
+    "difficulty": 2,
+    "estimated_minutes": 20,
+    "access_level": "free",
+    "title": "map, filter & reduce",
+    "summary": "Transform, select, and combine list items with the three methods behind most data work in the browser.",
+    "objectives": [
+      "Choose map, filter, or reduce by the shape of the result",
+      "Write reduce with an explicit initial value",
+      "Chain methods without building intermediate arrays you do not need"
+    ],
+    "prerequisites": [
+      "callbacks-and-higher-order-functions",
+      "creating-and-mutating-arrays"
+    ],
+    "practice_link": "cart-summary",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Same length, fewer items, one value",
+        "body": "`map(fn)` calls `fn` on every item and returns a **new array of the same length** holding the results. Use it when you want to convert each item, for example objects to labels.\n\n`filter(fn)` returns a **new array with only the items** for which `fn` returned a truthy value. The items themselves are not changed.\n\n`reduce(fn, initial)` walks the array carrying an accumulator: `fn(accumulator, item)` returns the next accumulator, and the final one is the result. It can produce **anything**: a number, an object used as a tally, or even another array. Always pass an initial value; without it, `reduce` uses the first item as the accumulator, which breaks on empty arrays and often yields the wrong type.\n\nAll three take callbacks with the signature `(item, index, array)` and do not mutate the original. They run synchronously and return before the next line executes.\n\nChaining reads well when each step is simple: `orders.filter(isPaid).map(toTotal).reduce(sum, 0)`. When a chain gets long or does several passes over large data, a single loop or a single `reduce` may be clearer and faster, but clarity should win at beginner level."
+      },
+      {
+        "type": "example",
+        "title": "Three shapes",
+        "body": "Same input, three kinds of output.",
+        "code": "const items = [\n  { name: 'Tea', price: 40, qty: 2 },\n  { name: 'Cake', price: 120, qty: 1 },\n  { name: 'Water', price: 20, qty: 0 },\n];\n\nconst names = items.map((item) => item.name);\nconst inCart = items.filter((item) => item.qty > 0);\nconst total = items.reduce((sum, item) => sum + item.price * item.qty, 0);\n\nconsole.log(names);           // ['Tea', 'Cake', 'Water']\nconsole.log(inCart.length);   // 2\nconsole.log(total);           // 200",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "reduce as a tally",
+        "body": "The accumulator is an object; the initial value `{}` is essential.",
+        "code": "const votes = ['tea', 'coffee', 'tea', 'juice', 'tea'];\n\nconst tally = votes.reduce((counts, drink) => {\n  counts[drink] = (counts[drink] ?? 0) + 1;\n  return counts;\n}, {});\n\nconsole.log(tally); // { tea: 3, coffee: 1, juice: 1 }",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Forgetting to `return` from the reduce callback, so the accumulator becomes `undefined` on the second step.\n- Omitting the initial value and crashing on an empty array.\n- Using `map` for side effects and discarding the result (use `forEach` or a loop).\n- Using `filter` then `[0]` when `find` says what you mean."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Almost every frontend interview includes one of these. Common asks: implement `map` with `reduce`, group objects by a key, or explain why `reduce` needs an initial value. Be ready to write the tally example from memory."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Cart summary** chains all three on a realistic order list."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Array.prototype.reduce()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Array.prototype.map()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Array.prototype.filter()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "searching-sorting-and-immutability",
+    "module": "arrays",
+    "position": 3,
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "access_level": "pro",
+    "title": "Searching, sorting & immutability",
+    "summary": "Find items with find, some, every and includes, sort with a comparator, and update arrays without mutating them.",
+    "objectives": [
+      "Pick the right search method for a boolean, an item, or an index",
+      "Write a numeric and a string comparator for sort",
+      "Produce updated copies of arrays with spread and the toX methods"
+    ],
+    "prerequisites": [
+      "map-filter-reduce"
+    ],
+    "practice_link": "top-scores",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Ask the right question",
+        "body": "The search methods differ in what they return. `includes(value)` answers a yes/no question for a primitive using strict equality (and correctly finds `NaN`). `indexOf` returns the position or `-1`. `find(fn)` returns the **first item** whose callback is truthy (or `undefined`), while `findIndex` returns its position. `some(fn)` is true if **any** item matches; `every(fn)` is true only if **all** match (and is true for an empty array).\n\n`sort(comparator)` orders in place. The comparator receives two items and returns a negative number to put the first earlier, positive to put it later, or zero to keep them equal. Without a comparator, items are converted to strings, which is why `[10, 9, 1].sort()` gives `[1, 10, 9]`. For numbers use `(a, b) => a - b`; for strings use `a.localeCompare(b)`. Modern engines guarantee a **stable** sort, so equal items keep their original order, which lets you sort by one key and then another.\n\n**Immutability** means treating arrays as values you replace rather than change. Instead of `arr.push(x)`, produce `[...arr, x]`; instead of `arr[i] = v`, use `arr.with(i, v)`; instead of `sort`, use `toSorted`. The pay-off is that comparing old and new arrays by reference tells you whether anything changed, which UI frameworks rely on to skip re-rendering."
+      },
+      {
+        "type": "example",
+        "title": "Search methods compared",
+        "body": "Each method answers a different question about the same data.",
+        "code": "const users = [\n  { id: 1, name: 'Mira', active: false },\n  { id: 2, name: 'Dev', active: true },\n];\n\nconsole.log(users.find((u) => u.active)?.name);        // 'Dev'\nconsole.log(users.findIndex((u) => u.id === 1));        // 0\nconsole.log(users.some((u) => u.active));               // true\nconsole.log(users.every((u) => u.active));              // false\nconsole.log([1, NaN].includes(NaN), [1, NaN].indexOf(NaN)); // true -1",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Comparators and non-mutating updates",
+        "body": "Sort by score descending, then by name as a tie-breaker, without touching the original.",
+        "code": "const results = [\n  { name: 'Bo', score: 80 },\n  { name: 'Al', score: 95 },\n  { name: 'Cy', score: 80 },\n];\n\nconst ranked = results.toSorted((a, b) => b.score - a.score || a.name.localeCompare(b.name));\nconsole.log(ranked.map((r) => r.name)); // ['Al', 'Bo', 'Cy']\n\nconst updated = ranked.with(0, { ...ranked[0], score: 100 });\nconsole.log(ranked[0].score, updated[0].score); // 95 100",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- `sort()` without a comparator on numbers.\n- Expecting `includes` to find objects by content; it compares references.\n- Returning `true`/`false` from a comparator instead of a number.\n- Reassigning inside `sort`'s callback or mutating items while sorting."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Sorting by multiple keys and \"why does [10, 9, 1].sort() give [1, 10, 9]?\" are common. Explaining why immutable updates help React-style rendering is a bonus that signals real-world experience."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Top scores** needs a multi-key comparator and must not mutate the input."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Array.prototype.sort()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Array.prototype.toSorted()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/toSorted",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Array.prototype.find()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/find",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "strings-and-template-literals",
+    "module": "strings-numbers-json",
+    "position": 1,
+    "difficulty": 1,
+    "estimated_minutes": 14,
+    "access_level": "free",
+    "title": "Strings & template literals",
+    "summary": "Build and inspect text with template literals and the string methods that appear in nearly every coding exercise.",
+    "objectives": [
+      "Interpolate values and write multi-line text with template literals",
+      "Use slice, split, join, trim, includes, and replaceAll confidently",
+      "Remember that strings are immutable and every method returns a new string"
+    ],
+    "prerequisites": [
+      "variables-and-types"
+    ],
+    "practice_link": "title-case",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Immutable text and the methods that matter",
+        "body": "Strings are primitive and **immutable**: no method changes the original; each returns a new string. `text.length` counts UTF-16 code units, which is why some emoji report a length of 2.\n\n**Template literals** use backticks. They interpolate any expression with `${…}`, keep line breaks as written, and avoid the quote-escaping dance of concatenation. They are the default choice for building text.\n\nThe everyday toolkit: `slice(start, end)` extracts a range (negative indexes count from the end); `split(separator)` turns a string into an array and `join(separator)` does the reverse; `trim` removes surrounding whitespace; `toUpperCase`/`toLowerCase` change case; `includes`, `startsWith`, and `endsWith` answer yes/no questions; `indexOf` gives a position; `replace` changes the first match and `replaceAll` changes every match; `padStart` is handy for zero-padding; `at(-1)` reads the last character.\n\nCompare strings with `===`. For user-facing ordering use `localeCompare`, which understands accents and case the way people expect."
+      },
+      {
+        "type": "example",
+        "title": "Template literals and the toolkit",
+        "body": "Interpolation, a method chain, and `split`/`join` to rebuild text.",
+        "code": "const name = '  Priya Nair ';\nconst order = 3;\n\nconst clean = name.trim();\nconsole.log(`Hi ${clean}, this is order #${String(order).padStart(3, '0')}`);\n// 'Hi Priya Nair, this is order #003'\n\nconst initials = clean.split(' ').map((part) => part[0]).join('');\nconsole.log(initials);                 // 'PN'\nconsole.log(clean.slice(-4));           // 'Nair'\nconsole.log('a-b-c'.replaceAll('-', '+')); // 'a+b+c'",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Immutability in practice",
+        "body": "`toUpperCase` did not change `word`; the result had to be captured.",
+        "code": "const word = 'quiet';\nword.toUpperCase();\nconsole.log(word);          // 'quiet'\n\nconst loud = word.toUpperCase();\nconsole.log(loud);          // 'QUIET'\nconsole.log(word.at(-1));   // 't'",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Calling a method and ignoring its return value, expecting the string to change.\n- `replace` when every occurrence should change; use `replaceAll` or a global regex.\n- Comparing case-different strings with `===` without normalising case first.\n- Building long strings with `+` inside loops when `join` on an array is clearer."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Reverse a string, check a palindrome, count vowels, title-case a sentence: string manipulation is the most common warm-up. Knowing `split`/`join`/`slice` cold and stating that strings are immutable gets you through quickly."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Title case** exercises `split`, `map`, `slice`, and `join` together."
+      },
+      {
+        "type": "summary",
+        "title": "Key takeaways",
+        "body": "Strings never change; every method hands back a new string, so capture the result. Template literals with ${} are the default way to build text from values and keep line breaks. The methods you will reach for most are slice, split and join, trim, includes and startsWith, replace and replaceAll, padStart, and at. Compare with === and, for user-facing ordering, localeCompare."
+      }
+    ],
+    "sources": [
+      {
+        "title": "String — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Template literals (Template strings)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "numbers-math-and-nan",
+    "module": "strings-numbers-json",
+    "position": 2,
+    "difficulty": 2,
+    "estimated_minutes": 16,
+    "access_level": "free",
+    "title": "Numbers, Math & NaN",
+    "summary": "Understand why 0.1 + 0.2 is not 0.3, parse and format numbers safely, and stop NaN from spreading through your code.",
+    "objectives": [
+      "Explain floating-point rounding and how to compare or display money safely",
+      "Convert strings to numbers with Number and parseInt and know how they differ",
+      "Detect NaN correctly and use the Math helpers that appear in interviews"
+    ],
+    "prerequisites": [
+      "type-conversion"
+    ],
+    "practice_link": "format-currency",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "One number type, many surprises",
+        "body": "JavaScript has a single `number` type: a 64-bit IEEE 754 float. Integers up to `Number.MAX_SAFE_INTEGER` (2^53 − 1) are exact; beyond that, precision is lost, which is what `BigInt` is for. Decimal fractions like 0.1 cannot be represented exactly, so `0.1 + 0.2` evaluates to `0.30000000000000004`. For money, work in the smallest unit (paise, cents) as integers, or round only when displaying with `toFixed(2)`, and compare with a tolerance (`Math.abs(a - b) < Number.EPSILON`) rather than `===`.\n\n`Number(text)` converts the whole string and gives `NaN` if any part is invalid; `parseInt(text, 10)` and `parseFloat(text)` read as many leading digits as they can and stop, so `parseInt('42px', 10)` is `42`. Always pass the radix to `parseInt`.\n\n`NaN` (\"not a number\") is the result of invalid arithmetic. It is the only value not equal to itself, so `x === NaN` is always false; use `Number.isNaN(x)`. Any arithmetic with `NaN` produces `NaN`, so catch it early.\n\nThe `Math` helpers you will use constantly: `round`, `floor`, `ceil`, `trunc`, `max`, `min`, `abs`, and `random` (a float in `[0, 1)`). A random integer between `min` and `max` inclusive is `Math.floor(Math.random() * (max - min + 1)) + min`."
+      },
+      {
+        "type": "example",
+        "title": "Rounding and money",
+        "body": "Store paise as integers; format only at the edge.",
+        "code": "console.log(0.1 + 0.2 === 0.3);                     // false\nconsole.log(Math.abs(0.1 + 0.2 - 0.3) < Number.EPSILON); // true\n\nconst paise = 12345; // ₹123.45 stored as an integer\nconsole.log((paise / 100).toFixed(2));               // '123.45'\nconsole.log((1.005).toFixed(2));                     // '1.00' (binary rounding!)\nconsole.log(Math.round(1.005 * 100) / 100);          // 1 (same reason)",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Parsing and NaN",
+        "body": "`Number` is strict; `parseInt` is forgiving. `NaN` needs `Number.isNaN`.",
+        "code": "console.log(Number('42px'), parseInt('42px', 10)); // NaN 42\nconsole.log(Number(''), Number('  7 '));           // 0 7\nconsole.log(parseInt('08', 10), parseFloat('3.9kg')); // 8 3.9\n\nconst bad = Number('abc');\nconsole.log(bad === NaN, Number.isNaN(bad));        // false true\nconsole.log(Number.isNaN('abc'), isNaN('abc'));     // false true (global isNaN coerces)",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Comparing floats with `===` after arithmetic.\n- `parseInt` without a radix, or on a float expecting rounding.\n- Using the global `isNaN`, which converts first and reports `true` for `'abc'`.\n- Storing money as decimals and accumulating rounding errors."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"Why is 0.1 + 0.2 !== 0.3?\" and \"how do you check for NaN?\" are staples. A confident answer mentions IEEE 754, integers for money, and `Number.isNaN`."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Format currency** takes an integer amount of paise and formats it as rupees with grouping."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Number — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Number.isNaN()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "ECMAScript Language Specification: The Number Type",
+        "url": "https://tc39.es/ecma262/#sec-ecmascript-language-types-number-type",
+        "publisher": "Ecma International"
+      }
+    ]
+  },
+  {
+    "slug": "json-and-serialization",
+    "module": "strings-numbers-json",
+    "position": 3,
+    "difficulty": 1,
+    "estimated_minutes": 12,
+    "access_level": "pro",
+    "title": "JSON & serialization",
+    "summary": "Convert between objects and JSON text, handle the values JSON cannot represent, and parse untrusted input safely.",
+    "objectives": [
+      "Use JSON.stringify and JSON.parse with their optional arguments",
+      "List the values that JSON drops or changes",
+      "Wrap JSON.parse in try/catch for data you did not produce"
+    ],
+    "prerequisites": [
+      "object-literals-and-property-access"
+    ],
+    "practice_link": "safe-json-parse",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Text in, objects out",
+        "body": "JSON is a text format for data: objects, arrays, strings, finite numbers, booleans, and `null`. `JSON.stringify(value)` turns a JavaScript value into that text; `JSON.parse(text)` turns text back into a value. Every network request, `localStorage` entry, and config file goes through this pair.\n\n`stringify` has rules worth memorising. `undefined`, functions, and symbols are **omitted** from objects and become `null` inside arrays. `NaN` and `Infinity` become `null`. `Date` objects become ISO strings (their `toJSON` result), and they come back from `parse` as plain strings, not dates. `Map` and `Set` become `{}`. Keys are always strings. Circular references throw.\n\nThe optional second argument is a **replacer** (an array of keys to keep, or a function), and the third is indentation for readable output: `JSON.stringify(obj, null, 2)`. `parse` accepts a **reviver** function to transform values as they are read, which is how you turn date strings back into `Date` objects.\n\n`JSON.parse` throws a `SyntaxError` on malformed input, so any text you did not create yourself, from a server, a file, or storage, belongs inside `try/catch` with a sensible fallback. A round trip through stringify/parse is a quick deep copy for JSON-safe data, but `structuredClone` is the proper tool because it keeps dates and nested types."
+      },
+      {
+        "type": "example",
+        "title": "What survives a round trip",
+        "body": "Watch which values disappear or change.",
+        "code": "const original = {\n  name: 'Report',\n  createdAt: new Date('2026-01-15T00:00:00Z'),\n  tags: ['a', undefined, 'b'],\n  notes: undefined,\n  ratio: NaN,\n  render() { return 'x'; },\n};\n\nconst text = JSON.stringify(original);\nconsole.log(text);\n// {\"name\":\"Report\",\"createdAt\":\"2026-01-15T00:00:00.000Z\",\"tags\":[\"a\",null,\"b\"],\"ratio\":null}\n\nconst copy = JSON.parse(text);\nconsole.log(typeof copy.createdAt); // 'string'\nconsole.log('notes' in copy);       // false",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Parsing safely with a reviver",
+        "body": "Malformed input is caught; date strings become dates on the way in.",
+        "code": "function parseReport(text) {\n  try {\n    return JSON.parse(text, (key, value) =>\n      key === 'createdAt' ? new Date(value) : value\n    );\n  } catch {\n    return null;\n  }\n}\n\nconsole.log(parseReport('{\"createdAt\":\"2026-01-15T00:00:00.000Z\"}').createdAt instanceof Date); // true\nconsole.log(parseReport('{not json'));  // null",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Expecting dates, `Map`s, or class instances to survive a round trip.\n- Calling `JSON.parse` on data from the network or storage without `try/catch`.\n- Using stringify/parse as a general deep clone and losing `undefined` values and dates.\n- Forgetting that keys become strings, so `{ 1: 'a' }` comes back as `{ '1': 'a' }`."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"What does JSON.stringify do with undefined / functions / dates?\" is a favourite quick check. Mentioning replacer and reviver, and `structuredClone` for real deep copies, marks you as careful."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Safe JSON parse** builds the wrapper with a fallback and a reviver."
+      }
+    ],
+    "sources": [
+      {
+        "title": "JSON.stringify()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "JSON.parse()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/parse",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "structuredClone()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "try-catch-throw-and-error-types",
+    "module": "errors-and-debugging",
+    "position": 1,
+    "difficulty": 2,
+    "estimated_minutes": 16,
+    "access_level": "free",
+    "title": "try / catch / throw & error types",
+    "summary": "Throw meaningful errors, catch only what you can handle, and use finally for cleanup that must always run.",
+    "objectives": [
+      "Throw Error objects rather than strings and explain why",
+      "Read name, message, and cause from a caught error",
+      "Know when finally runs and how errors travel up the call stack"
+    ],
+    "prerequisites": [
+      "callbacks-and-higher-order-functions"
+    ],
+    "practice_link": "parse-age",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Errors are values that travel",
+        "body": "When code cannot continue sensibly it should `throw`. Always throw an `Error` (or a subclass such as `TypeError`, `RangeError`, or your own `class ValidationError extends Error`), never a bare string: `Error` objects carry a `name`, a `message`, and a `stack`, and tools rely on those. Since ES2022 you can attach the original problem with `new Error('Could not save', { cause: err })`.\n\nA thrown error unwinds the call stack until it reaches a `try` block with a matching `catch`. Code after the throw in each function does not run. If nothing catches it, the script reports an uncaught exception. `catch (error)` receives the thrown value; the binding is optional when you do not need it.\n\n`finally` runs whether the `try` succeeded, threw, or returned early, which makes it the right place for cleanup: closing a connection, hiding a spinner, releasing a lock.\n\nCatch narrowly. A `catch` that swallows every error and does nothing hides bugs. Inspect `error instanceof SomeError` or `error.name`, handle what you understand, and rethrow the rest. Inside `async` functions the same syntax works with `await`, and a rejected promise behaves exactly like a thrown error."
+      },
+      {
+        "type": "example",
+        "title": "Throwing, catching, and finally",
+        "body": "The spinner is hidden on both paths; only the invalid input path logs an error.",
+        "code": "class ValidationError extends Error {\n  constructor(message) {\n    super(message);\n    this.name = 'ValidationError';\n  }\n}\n\nfunction parseQuantity(input) {\n  const n = Number(input);\n  if (!Number.isInteger(n) || n < 1) {\n    throw new ValidationError(`Invalid quantity: ${input}`);\n  }\n  return n;\n}\n\nfor (const input of ['3', 'many']) {\n  try {\n    console.log('parsed', parseQuantity(input));\n  } catch (error) {\n    if (error instanceof ValidationError) console.log(error.name, '-', error.message);\n    else throw error;\n  } finally {\n    console.log('done with', input);\n  }\n}",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Wrapping with cause",
+        "body": "The outer error explains the situation; `cause` preserves the original detail.",
+        "code": "function loadSettings(text) {\n  try {\n    return JSON.parse(text);\n  } catch (error) {\n    throw new Error('Settings file is corrupt', { cause: error });\n  }\n}\n\ntry {\n  loadSettings('{oops');\n} catch (error) {\n  console.log(error.message);       // 'Settings file is corrupt'\n  console.log(error.cause.name);    // 'SyntaxError'\n}",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- `throw 'something went wrong'` (no stack, no name, breaks `instanceof`).\n- Empty `catch {}` blocks that silence failures.\n- Expecting `try/catch` to catch an error thrown later inside a callback or a promise that was not awaited.\n- Doing the cleanup in `try` and skipping it when an error occurs."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"When does finally run?\" and \"how do you create a custom error?\" are common. Interviewers also probe whether `try/catch` around `setTimeout(() => { throw … })` catches anything (it does not)."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Parse age** throws typed errors for bad input and returns a clean value otherwise."
+      }
+    ],
+    "sources": [
+      {
+        "title": "try...catch — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Error: cause",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  }
+]

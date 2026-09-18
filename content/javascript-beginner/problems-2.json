@@ -1,0 +1,990 @@
+[
+  {
+    "slug": "format-currency",
+    "title": "Format rupees from paise",
+    "topic": "Numbers",
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "is_premium": false,
+    "position": 20,
+    "summary": "Integer money, correct rounding, and Indian digit grouping.",
+    "prompt": "Write formatINR(paise). paise is an integer amount in paise (1 rupee = 100 paise), possibly negative. Return a string such as '₹1,23,456.78' using the Indian grouping system: the last three digits of the rupee part form one group, then groups of two. Always show two decimal places. Negative amounts start with '-' before the symbol. Throw a TypeError if paise is not a safe integer.",
+    "contract": {
+      "signature": "formatINR(paise: number): string",
+      "params": [
+        {
+          "name": "paise",
+          "type": "safe integer"
+        }
+      ],
+      "returns": "formatted string"
+    },
+    "constraints": [
+      "Do not use Intl.NumberFormat; implement the grouping yourself",
+      "Throw TypeError for non-integers and non-safe integers"
+    ],
+    "starter_code": "function formatINR(paise) {\n  // Return '₹1,23,456.78' style strings.\n}",
+    "tests": [
+      {
+        "label": "large amount",
+        "expression": "formatINR(12345678)",
+        "expected": "₹1,23,456.78"
+      },
+      {
+        "label": "small amount",
+        "expression": "formatINR(950)",
+        "expected": "₹9.50"
+      },
+      {
+        "label": "zero",
+        "expression": "formatINR(0)",
+        "expected": "₹0.00"
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "exactly one thousand",
+        "expression": "formatINR(100000)",
+        "expected": "₹1,000.00"
+      },
+      {
+        "label": "negative",
+        "expression": "formatINR(-250075)",
+        "expected": "-₹2,500.75"
+      },
+      {
+        "label": "crores",
+        "expression": "formatINR(1234567890)",
+        "expected": "₹1,23,45,678.90"
+      },
+      {
+        "label": "non-integer throws",
+        "expression": "(() => { try { formatINR(10.5); return 'no throw'; } catch (e) { return e.name; } })()",
+        "expected": "TypeError"
+      },
+      {
+        "label": "under a rupee",
+        "expression": "formatINR(5)",
+        "expected": "₹0.05"
+      }
+    ],
+    "hints": [
+      "Number.isSafeInteger is the validation you need.",
+      "Work with Math.abs, split rupees = Math.floor(abs / 100) and paise = abs % 100 (pad to 2 digits).",
+      "Group the rupee string from the right: take the last 3 digits, then insert commas every 2 digits in what remains (a regex like /\\B(?=(\\d{2})+(?!\\d))/g on the leading part works)."
+    ],
+    "solution_code": "function formatINR(paise) {\n  if (!Number.isSafeInteger(paise)) throw new TypeError('paise must be a safe integer');\n  const sign = paise < 0 ? '-' : '';\n  const abs = Math.abs(paise);\n  const rupees = String(Math.floor(abs / 100));\n  const fraction = String(abs % 100).padStart(2, '0');\n  let grouped = rupees;\n  if (rupees.length > 3) {\n    const head = rupees.slice(0, -3).replace(/\\B(?=(\\d{2})+(?!\\d))/g, ',');\n    grouped = `${head},${rupees.slice(-3)}`;\n  }\n  return `${sign}₹${grouped}.${fraction}`;\n}",
+    "explanation": "Keeping money as integer paise avoids float rounding entirely; the only arithmetic is integer division and remainder. Indian grouping differs from Western grouping only in the part before the last three digits, which is grouped in twos.",
+    "complexity": "O(d) in the number of digits"
+  },
+  {
+    "slug": "safe-json-parse",
+    "title": "Safe JSON parse with reviver",
+    "topic": "JSON",
+    "difficulty": 1,
+    "estimated_minutes": 14,
+    "is_premium": false,
+    "position": 21,
+    "summary": "Wrap JSON.parse with a fallback and revive ISO dates.",
+    "prompt": "Write safeParse(text, fallback). Return the parsed value, or fallback when text is not a string or is not valid JSON. Additionally, any string value that matches the full ISO timestamp pattern YYYY-MM-DDTHH:MM:SS(.sss)Z must be converted to a Date object during parsing.",
+    "contract": {
+      "signature": "safeParse(text: unknown, fallback: any): any",
+      "params": [
+        {
+          "name": "text",
+          "type": "any"
+        },
+        {
+          "name": "fallback",
+          "type": "any"
+        }
+      ],
+      "returns": "parsed value or fallback"
+    },
+    "constraints": [
+      "Never throw",
+      "Only strings matching the exact ISO pattern become Dates"
+    ],
+    "starter_code": "function safeParse(text, fallback) {\n  // Parse safely, reviving ISO timestamps into Date objects.\n}",
+    "tests": [
+      {
+        "label": "valid object",
+        "expression": "safeParse('{\"a\":1}', null)",
+        "expected": {
+          "a": 1
+        }
+      },
+      {
+        "label": "invalid json",
+        "expression": "safeParse('{oops', 'fallback')",
+        "expected": "fallback"
+      },
+      {
+        "label": "revives date",
+        "expression": "safeParse('{\"at\":\"2026-01-15T10:00:00.000Z\"}', null).at instanceof Date",
+        "expected": true
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "non-string input",
+        "expression": "safeParse(undefined, [])",
+        "expected": []
+      },
+      {
+        "label": "plain date-like text not revived",
+        "expression": "typeof safeParse('{\"at\":\"2026-01-15\"}', null).at",
+        "expected": "string"
+      },
+      {
+        "label": "revived date value",
+        "expression": "safeParse('\"2026-01-15T10:00:00Z\"', null).getTime()",
+        "expected": 1768471200000
+      },
+      {
+        "label": "nested arrays",
+        "expression": "safeParse('[1,[2,3]]', null)",
+        "expected": [
+          1,
+          [
+            2,
+            3
+          ]
+        ]
+      }
+    ],
+    "hints": [
+      "typeof text !== 'string' returns fallback immediately.",
+      "JSON.parse(text, reviver) calls reviver(key, value) for every value.",
+      "Use a regex like /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z$/ to decide what to revive."
+    ],
+    "solution_code": "const ISO = /^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z$/;\n\nfunction safeParse(text, fallback) {\n  if (typeof text !== 'string') return fallback;\n  try {\n    return JSON.parse(text, (key, value) => (typeof value === 'string' && ISO.test(value) ? new Date(value) : value));\n  } catch {\n    return fallback;\n  }\n}",
+    "explanation": "The reviver runs for every parsed value, so a single regex test is enough to convert matching strings while leaving everything else untouched. try/catch turns the SyntaxError from malformed input into a fallback.",
+    "complexity": "O(n) in the length of the text"
+  },
+  {
+    "slug": "parse-age",
+    "title": "Parse an age with typed errors",
+    "topic": "Errors",
+    "difficulty": 2,
+    "estimated_minutes": 15,
+    "is_premium": false,
+    "position": 22,
+    "summary": "Throw the right error type and let callers distinguish them.",
+    "prompt": "Define class ValidationError extends Error with name 'ValidationError'. Write parseAge(input) which accepts a string or number and returns an integer age. Throw a TypeError when input is neither a string nor a number. Throw a ValidationError with message 'Age must be a whole number' when the value is not an integer (strings must contain only digits with optional surrounding whitespace), and 'Age must be between 0 and 150' when it is outside that range.",
+    "contract": {
+      "signature": "parseAge(input: string | number): number",
+      "params": [
+        {
+          "name": "input",
+          "type": "string | number"
+        }
+      ],
+      "returns": "integer"
+    },
+    "constraints": [
+      "ValidationError instances must satisfy instanceof Error and have name 'ValidationError'",
+      "Messages must match exactly"
+    ],
+    "starter_code": "class ValidationError extends Error {\n  // set the name\n}\n\nfunction parseAge(input) {\n  // Return an integer or throw.\n}",
+    "tests": [
+      {
+        "label": "number",
+        "expression": "parseAge(29)",
+        "expected": 29
+      },
+      {
+        "label": "string with spaces",
+        "expression": "parseAge(' 42 ')",
+        "expected": 42
+      },
+      {
+        "label": "decimal rejected",
+        "expression": "(() => { try { parseAge('4.5'); return 'no throw'; } catch (e) { return [e.name, e.message]; } })()",
+        "expected": [
+          "ValidationError",
+          "Age must be a whole number"
+        ]
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "wrong type",
+        "expression": "(() => { try { parseAge(null); return 'no throw'; } catch (e) { return e.name; } })()",
+        "expected": "TypeError"
+      },
+      {
+        "label": "out of range",
+        "expression": "(() => { try { parseAge(151); return 'no throw'; } catch (e) { return e.message; } })()",
+        "expected": "Age must be between 0 and 150"
+      },
+      {
+        "label": "negative string",
+        "expression": "(() => { try { parseAge('-1'); return 'no throw'; } catch (e) { return e.message; } })()",
+        "expected": "Age must be a whole number"
+      },
+      {
+        "label": "instanceof Error",
+        "expression": "(() => { try { parseAge('x'); } catch (e) { return e instanceof Error && e instanceof ValidationError; } })()",
+        "expected": true
+      },
+      {
+        "label": "boundary 0 and 150",
+        "expression": "[parseAge('0'), parseAge(150)]",
+        "expected": [
+          0,
+          150
+        ]
+      }
+    ],
+    "hints": [
+      "In the constructor call super(message) then set this.name.",
+      "For strings, /^\\s*\\d+\\s*$/ tests 'only digits'; then convert with Number.",
+      "For numbers, Number.isInteger is the check; then apply the range rule to both paths."
+    ],
+    "solution_code": "class ValidationError extends Error {\n  constructor(message) {\n    super(message);\n    this.name = 'ValidationError';\n  }\n}\n\nfunction parseAge(input) {\n  let value;\n  if (typeof input === 'number') {\n    value = input;\n  } else if (typeof input === 'string') {\n    if (!/^\\s*\\d+\\s*$/.test(input)) throw new ValidationError('Age must be a whole number');\n    value = Number(input);\n  } else {\n    throw new TypeError('Age must be a string or number');\n  }\n  if (!Number.isInteger(value)) throw new ValidationError('Age must be a whole number');\n  if (value < 0 || value > 150) throw new ValidationError('Age must be between 0 and 150');\n  return value;\n}",
+    "explanation": "Different error types let callers react differently: a TypeError signals a programming mistake while a ValidationError is user-facing. Subclassing Error keeps stack traces and instanceof working.",
+    "complexity": "O(n) in the input length"
+  },
+  {
+    "slug": "find-the-bug-off-by-one",
+    "title": "Find the bug: off by one",
+    "topic": "Debugging",
+    "difficulty": 1,
+    "estimated_minutes": 12,
+    "is_premium": true,
+    "position": 23,
+    "summary": "Read a failing case and a stack trace, then fix the loop.",
+    "prompt": "The function below is meant to return the last n items of list in their original order, and the full list when n is larger than the list. A test reported: expected ['c', 'd'] but received ['b', 'c', 'd'] for lastN(['a','b','c','d'], 2), and another crashed with TypeError at lastN (line 4) for lastN([], 1). Fix lastN without changing its signature.\n\nfunction lastN(list, n) {\n  const out = [];\n  for (let i = list.length - n - 1; i < list.length; i++) {\n    out.push(list[i].toString());\n  }\n  return out;\n}",
+    "contract": {
+      "signature": "lastN(list: any[], n: number): any[]",
+      "params": [],
+      "returns": "new array with the last n items"
+    },
+    "constraints": [
+      "Return items unchanged (do not convert to strings)",
+      "n of 0 returns an empty array; negative n is treated as 0"
+    ],
+    "starter_code": "function lastN(list, n) {\n  const out = [];\n  for (let i = list.length - n - 1; i < list.length; i++) {\n    out.push(list[i].toString());\n  }\n  return out;\n}",
+    "tests": [
+      {
+        "label": "last two",
+        "expression": "lastN(['a', 'b', 'c', 'd'], 2)",
+        "expected": [
+          "c",
+          "d"
+        ]
+      },
+      {
+        "label": "n larger than list",
+        "expression": "lastN([1, 2], 5)",
+        "expected": [
+          1,
+          2
+        ]
+      },
+      {
+        "label": "empty list",
+        "expression": "lastN([], 1)",
+        "expected": []
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "items not stringified",
+        "expression": "lastN([1, 2, 3], 2)",
+        "expected": [
+          2,
+          3
+        ]
+      },
+      {
+        "label": "n zero",
+        "expression": "lastN([1, 2, 3], 0)",
+        "expected": []
+      },
+      {
+        "label": "negative n",
+        "expression": "lastN([1, 2, 3], -2)",
+        "expected": []
+      },
+      {
+        "label": "exact length",
+        "expression": "lastN(['x', 'y'], 2)",
+        "expected": [
+          "x",
+          "y"
+        ]
+      }
+    ],
+    "hints": [
+      "The start index is one too small; the last n items start at list.length - n.",
+      "When n exceeds the length the start index goes negative; clamp it with Math.max(0, …).",
+      "toString on undefined is what threw; also, the statement says to return items unchanged."
+    ],
+    "solution_code": "function lastN(list, n) {\n  const count = Math.max(0, n);\n  const start = Math.max(0, list.length - count);\n  const out = [];\n  for (let i = start; i < list.length; i++) {\n    out.push(list[i]);\n  }\n  return out;\n}",
+    "explanation": "Two bugs: the start index was off by one (an extra - 1), and a negative start index read undefined entries whose toString call threw. Clamping the start to 0 and pushing the items as-is fixes both. list.slice(-count) would also work when count is positive.",
+    "complexity": "O(n) time and space"
+  },
+  {
+    "slug": "render-status-badge",
+    "title": "Render a status badge (view model)",
+    "topic": "DOM",
+    "difficulty": 1,
+    "estimated_minutes": 14,
+    "is_premium": false,
+    "position": 24,
+    "summary": "Compute the exact text and class list a badge element should show.",
+    "prompt": "Write badgeView(order). order is { status, itemCount, updatedAt }. Return { text, classes, attributes }. text is the status capitalised, followed by ' · ' and 'N items' (or '1 item'). classes is an array: always 'badge', plus 'badge--paid', 'badge--pending', or 'badge--failed' matching the status, plus 'badge--empty' when itemCount is 0. attributes is an object with 'aria-live' set to 'polite' and 'data-updated' set to updatedAt. Unknown statuses get the class 'badge--unknown' and the text 'Unknown'.",
+    "contract": {
+      "signature": "badgeView(order: { status: string; itemCount: number; updatedAt: string }): { text: string; classes: string[]; attributes: Record<string, string> }",
+      "params": [],
+      "returns": "view model object"
+    },
+    "constraints": [
+      "Class order: 'badge', status class, then 'badge--empty' if applicable"
+    ],
+    "starter_code": "function badgeView(order) {\n  // Return { text, classes, attributes }.\n}",
+    "tests": [
+      {
+        "label": "paid with items",
+        "expression": "badgeView({ status: 'paid', itemCount: 3, updatedAt: '2026-01-01' })",
+        "expected": {
+          "text": "Paid · 3 items",
+          "classes": [
+            "badge",
+            "badge--paid"
+          ],
+          "attributes": {
+            "aria-live": "polite",
+            "data-updated": "2026-01-01"
+          }
+        }
+      },
+      {
+        "label": "singular",
+        "expression": "badgeView({ status: 'pending', itemCount: 1, updatedAt: 't' }).text",
+        "expected": "Pending · 1 item"
+      },
+      {
+        "label": "attributes carry updatedAt",
+        "expression": "badgeView({ status: 'paid', itemCount: 2, updatedAt: '2026-05-01' }).attributes['data-updated']",
+        "expected": "2026-05-01"
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "empty adds class",
+        "expression": "badgeView({ status: 'failed', itemCount: 0, updatedAt: 't' }).classes",
+        "expected": [
+          "badge",
+          "badge--failed",
+          "badge--empty"
+        ]
+      },
+      {
+        "label": "unknown status",
+        "expression": "badgeView({ status: 'refunded', itemCount: 2, updatedAt: 't' })",
+        "expected": {
+          "text": "Unknown · 2 items",
+          "classes": [
+            "badge",
+            "badge--unknown"
+          ],
+          "attributes": {
+            "aria-live": "polite",
+            "data-updated": "t"
+          }
+        }
+      },
+      {
+        "label": "zero items text",
+        "expression": "badgeView({ status: 'paid', itemCount: 0, updatedAt: 't' }).text",
+        "expected": "Paid · 0 items"
+      }
+    ],
+    "hints": [
+      "A Set or array of known statuses decides between the status class and 'badge--unknown'.",
+      "Pluralise with itemCount === 1 ? 'item' : 'items'.",
+      "Build classes as an array and push 'badge--empty' conditionally to keep the order right."
+    ],
+    "solution_code": "const KNOWN = ['paid', 'pending', 'failed'];\n\nfunction badgeView(order) {\n  const known = KNOWN.includes(order.status);\n  const label = known ? order.status[0].toUpperCase() + order.status.slice(1) : 'Unknown';\n  const noun = order.itemCount === 1 ? 'item' : 'items';\n  const classes = ['badge', known ? `badge--${order.status}` : 'badge--unknown'];\n  if (order.itemCount === 0) classes.push('badge--empty');\n  return {\n    text: `${label} · ${order.itemCount} ${noun}`,\n    classes,\n    attributes: { 'aria-live': 'polite', 'data-updated': order.updatedAt },\n  };\n}",
+    "explanation": "Separating the view model from DOM calls makes the logic testable without a browser. In real code the result feeds textContent, classList.add(...classes), and setAttribute for each entry.",
+    "complexity": "O(1)"
+  },
+  {
+    "slug": "build-list-markup",
+    "title": "Build list markup from data",
+    "topic": "DOM",
+    "difficulty": 2,
+    "estimated_minutes": 16,
+    "is_premium": false,
+    "position": 25,
+    "summary": "Produce the node tree a DocumentFragment render would create.",
+    "prompt": "Write buildList(items). items is an array of { id, name, done }. Return an object describing a <ul> with class 'items': { tag: 'ul', classes: ['items'], children: [...] } where each child is { tag: 'li', classes, dataset, text }. classes is ['item'] plus 'item--done' when done is true; dataset is { id: String(id) }; text is the name. Escape nothing (the renderer will use textContent). Return children in input order. An empty input returns a ul with no children.",
+    "contract": {
+      "signature": "buildList(items: Array<{ id: number | string; name: string; done: boolean }>): { tag: 'ul'; classes: string[]; children: Array<{ tag: 'li'; classes: string[]; dataset: { id: string }; text: string }> }",
+      "params": [],
+      "returns": "tree description"
+    },
+    "constraints": [
+      "dataset.id must be a string",
+      "Do not mutate items"
+    ],
+    "starter_code": "function buildList(items) {\n  // Return the tree description.\n}",
+    "tests": [
+      {
+        "label": "two items",
+        "expression": "buildList([{ id: 1, name: 'Tea', done: true }, { id: 2, name: 'Cake', done: false }])",
+        "expected": {
+          "tag": "ul",
+          "classes": [
+            "items"
+          ],
+          "children": [
+            {
+              "tag": "li",
+              "classes": [
+                "item",
+                "item--done"
+              ],
+              "dataset": {
+                "id": "1"
+              },
+              "text": "Tea"
+            },
+            {
+              "tag": "li",
+              "classes": [
+                "item"
+              ],
+              "dataset": {
+                "id": "2"
+              },
+              "text": "Cake"
+            }
+          ]
+        }
+      },
+      {
+        "label": "empty",
+        "expression": "buildList([])",
+        "expected": {
+          "tag": "ul",
+          "classes": [
+            "items"
+          ],
+          "children": []
+        }
+      },
+      {
+        "label": "done class only when done",
+        "expression": "buildList([{ id: 5, name: 'Z', done: false }]).children[0].classes",
+        "expected": [
+          "item"
+        ]
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "string id kept",
+        "expression": "buildList([{ id: 'x9', name: 'A', done: false }]).children[0].dataset",
+        "expected": {
+          "id": "x9"
+        }
+      },
+      {
+        "label": "order preserved",
+        "expression": "buildList([{ id: 3, name: 'c', done: false }, { id: 1, name: 'a', done: false }]).children.map((c) => c.text)",
+        "expected": [
+          "c",
+          "a"
+        ]
+      },
+      {
+        "label": "input not mutated",
+        "expression": "(() => { const items = [{ id: 1, name: 'A', done: true }]; buildList(items); return Object.keys(items[0]); })()",
+        "expected": [
+          "id",
+          "name",
+          "done"
+        ]
+      }
+    ],
+    "hints": [
+      "map over items to produce the children array.",
+      "Build classes as ['item'] and conditionally push 'item--done'.",
+      "String(item.id) converts numbers without changing existing strings."
+    ],
+    "solution_code": "function buildList(items) {\n  return {\n    tag: 'ul',\n    classes: ['items'],\n    children: items.map((item) => {\n      const classes = ['item'];\n      if (item.done) classes.push('item--done');\n      return { tag: 'li', classes, dataset: { id: String(item.id) }, text: item.name };\n    }),\n  };\n}",
+    "explanation": "This is the data half of a render function: map turns each record into the description of an element. A DOM renderer would walk the tree calling createElement, classList.add, and dataset assignments, then append everything through a fragment.",
+    "complexity": "O(n) time and space"
+  },
+  {
+    "slug": "event-delegation-router",
+    "title": "Event delegation router",
+    "topic": "DOM",
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "is_premium": true,
+    "position": 26,
+    "summary": "Map a clicked element to an action by walking up its ancestors.",
+    "prompt": "Write resolveAction(target). target is a plain object describing a clicked element: { dataset, parent } where dataset is an object of data attributes and parent is another such object or null. Starting from target and moving up through parent links, find the first element whose dataset has an 'action' key. Return { action, id } where id is the nearest 'id' found in dataset from that element upward (or null). If no element has an action, return null. Stop searching when parent is null.",
+    "contract": {
+      "signature": "resolveAction(target: { dataset: Record<string, string>; parent: object | null }): { action: string; id: string | null } | null",
+      "params": [],
+      "returns": "action descriptor or null"
+    },
+    "constraints": [
+      "Do not use recursion deeper than the tree height; a loop is fine",
+      "id may be on the same element as action or on any ancestor above it"
+    ],
+    "starter_code": "function resolveAction(target) {\n  // Walk up parents to find data-action, then the nearest data-id.\n}",
+    "tests": [
+      {
+        "label": "action on target",
+        "expression": "resolveAction({ dataset: { action: 'remove', id: '7' }, parent: null })",
+        "expected": {
+          "action": "remove",
+          "id": "7"
+        }
+      },
+      {
+        "label": "action on ancestor",
+        "expression": "resolveAction({ dataset: {}, parent: { dataset: { action: 'open' }, parent: { dataset: { id: '3' }, parent: null } } })",
+        "expected": {
+          "action": "open",
+          "id": "3"
+        }
+      },
+      {
+        "label": "no action",
+        "expression": "resolveAction({ dataset: { id: '1' }, parent: { dataset: {}, parent: null } })",
+        "expected": null
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "id below action ignored",
+        "expression": "resolveAction({ dataset: { id: 'inner' }, parent: { dataset: { action: 'edit' }, parent: { dataset: { id: 'outer' }, parent: null } } })",
+        "expected": {
+          "action": "edit",
+          "id": "outer"
+        }
+      },
+      {
+        "label": "no id anywhere",
+        "expression": "resolveAction({ dataset: { action: 'go' }, parent: null })",
+        "expected": {
+          "action": "go",
+          "id": null
+        }
+      },
+      {
+        "label": "nearest action wins",
+        "expression": "resolveAction({ dataset: { action: 'a1' }, parent: { dataset: { action: 'a2', id: 'x' }, parent: null } })",
+        "expected": {
+          "action": "a1",
+          "id": "x"
+        }
+      }
+    ],
+    "hints": [
+      "Use a while loop with a node variable that moves to node.parent.",
+      "First find the action node; then continue upward from that node looking for id.",
+      "Return null the moment the walk finishes without finding an action."
+    ],
+    "solution_code": "function resolveAction(target) {\n  let node = target;\n  while (node && !('action' in node.dataset)) node = node.parent;\n  if (!node) return null;\n  const action = node.dataset.action;\n  let cursor = node;\n  while (cursor && !('id' in cursor.dataset)) cursor = cursor.parent;\n  return { action, id: cursor ? cursor.dataset.id : null };\n}",
+    "explanation": "This mirrors event.target.closest('[data-action]') followed by a second closest('[data-id]') from that element. Walking with a loop keeps it simple and makes the 'id below the action is ignored' rule explicit.",
+    "complexity": "O(h) in the tree height"
+  },
+  {
+    "slug": "validate-signup-form",
+    "title": "Validate a sign-up form",
+    "topic": "Forms",
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "is_premium": false,
+    "position": 27,
+    "summary": "Pure validation returning an errors object the UI can render.",
+    "prompt": "Write validateSignup(values). values is { email, password, confirm, age, terms }. Return an object mapping field names to error messages; a valid form returns {}. Rules: email must contain exactly one '@' with characters on both sides ('Enter a valid email'); password must be at least 8 characters and contain a digit ('Password needs 8+ characters and a digit'); confirm must equal password ('Passwords do not match'); age (a string from an input) must parse to an integer between 13 and 120 ('Enter an age between 13 and 120'); terms must be true ('Accept the terms to continue'). All fields are checked; report every failing field.",
+    "contract": {
+      "signature": "validateSignup(values: { email: string; password: string; confirm: string; age: string; terms: boolean }): Record<string, string>",
+      "params": [],
+      "returns": "errors object"
+    },
+    "constraints": [
+      "Report all failing fields, not just the first",
+      "age arrives as a string"
+    ],
+    "starter_code": "function validateSignup(values) {\n  // Return { field: message } for each failing field.\n}",
+    "tests": [
+      {
+        "label": "valid",
+        "expression": "validateSignup({ email: 'a@b.c', password: 'secret12', confirm: 'secret12', age: '30', terms: true })",
+        "expected": {}
+      },
+      {
+        "label": "mismatch and terms",
+        "expression": "validateSignup({ email: 'a@b.c', password: 'secret12', confirm: 'secret13', age: '30', terms: false })",
+        "expected": {
+          "confirm": "Passwords do not match",
+          "terms": "Accept the terms to continue"
+        }
+      },
+      {
+        "label": "underage",
+        "expression": "validateSignup({ email: 'a@b.c', password: 'secret12', confirm: 'secret12', age: '12', terms: true })",
+        "expected": {
+          "age": "Enter an age between 13 and 120"
+        }
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "bad email",
+        "expression": "validateSignup({ email: 'ab.c', password: 'secret12', confirm: 'secret12', age: '30', terms: true })",
+        "expected": {
+          "email": "Enter a valid email"
+        }
+      },
+      {
+        "label": "weak password",
+        "expression": "validateSignup({ email: 'a@b.c', password: 'password', confirm: 'password', age: '30', terms: true }).password",
+        "expected": "Password needs 8+ characters and a digit"
+      },
+      {
+        "label": "age decimal",
+        "expression": "validateSignup({ email: 'a@b.c', password: 'secret12', confirm: 'secret12', age: '30.5', terms: true }).age",
+        "expected": "Enter an age between 13 and 120"
+      },
+      {
+        "label": "everything wrong",
+        "expression": "Object.keys(validateSignup({ email: '', password: '', confirm: 'x', age: '', terms: false })).sort()",
+        "expected": [
+          "age",
+          "confirm",
+          "email",
+          "password",
+          "terms"
+        ]
+      },
+      {
+        "label": "two @ signs",
+        "expression": "validateSignup({ email: 'a@@b', password: 'secret12', confirm: 'secret12', age: '30', terms: true }).email",
+        "expected": "Enter a valid email"
+      }
+    ],
+    "hints": [
+      "Build an errors object and add keys as rules fail; return it at the end.",
+      "/^[^@]+@[^@]+$/ enforces exactly one @ with text on both sides.",
+      "For age: /^\\d+$/.test(age) then Number(age) and the range check."
+    ],
+    "solution_code": "function validateSignup(values) {\n  const errors = {};\n  const { email = '', password = '', confirm = '', age = '', terms = false } = values;\n  if (!/^[^@]+@[^@]+$/.test(email)) errors.email = 'Enter a valid email';\n  if (password.length < 8 || !/\\d/.test(password)) errors.password = 'Password needs 8+ characters and a digit';\n  if (confirm !== password) errors.confirm = 'Passwords do not match';\n  const ageNumber = /^\\d+$/.test(String(age).trim()) ? Number(age) : NaN;\n  if (!(ageNumber >= 13 && ageNumber <= 120)) errors.age = 'Enter an age between 13 and 120';\n  if (terms !== true) errors.terms = 'Accept the terms to continue';\n  return errors;\n}",
+    "explanation": "Returning an errors object rather than a boolean lets the UI show every message next to its field. Each rule is independent, so all failures are collected in one pass.",
+    "complexity": "O(n) in the total input length"
+  },
+  {
+    "slug": "timed-sequence",
+    "title": "Timed sequence with cancel",
+    "topic": "Async JavaScript",
+    "difficulty": 2,
+    "estimated_minutes": 20,
+    "is_premium": true,
+    "position": 28,
+    "summary": "Schedule callbacks with setTimeout and report the order they fire.",
+    "prompt": "Write schedule(items). items is an array of [name, delayMs] pairs. Start a setTimeout for every item immediately. Return { promise, cancel } where promise resolves to an array of names in the order their timers fired, once all have fired. Calling cancel() clears every timer that has not fired yet and resolves the promise with the names that have fired so far. Calling cancel after completion has no effect.",
+    "contract": {
+      "signature": "schedule(items: Array<[string, number]>): { promise: Promise<string[]>; cancel(): void }",
+      "params": [],
+      "returns": "{ promise, cancel }"
+    },
+    "constraints": [
+      "Timers must be started synchronously inside schedule",
+      "Resolve exactly once"
+    ],
+    "starter_code": "function schedule(items) {\n  // Return { promise, cancel }.\n}",
+    "tests": [
+      {
+        "label": "fires in delay order",
+        "expression": "schedule([['a', 30], ['b', 10], ['c', 20]]).promise",
+        "expected": [
+          "b",
+          "c",
+          "a"
+        ]
+      },
+      {
+        "label": "empty resolves immediately",
+        "expression": "schedule([]).promise",
+        "expected": []
+      },
+      {
+        "label": "cancel stops the rest",
+        "expression": "(async () => { const s = schedule([['x', 5], ['y', 60]]); await new Promise((r) => setTimeout(r, 25)); s.cancel(); return s.promise; })()",
+        "expected": [
+          "x"
+        ]
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "cancel before any fire",
+        "expression": "(() => { const s = schedule([['x', 50]]); s.cancel(); return s.promise; })()",
+        "expected": []
+      },
+      {
+        "label": "cancel after completion is harmless",
+        "expression": "(async () => { const s = schedule([['q', 5]]); const r = await s.promise; s.cancel(); return r; })()",
+        "expected": [
+          "q"
+        ]
+      },
+      {
+        "label": "same delays keep input order",
+        "expression": "schedule([['m', 10], ['n', 10]]).promise",
+        "expected": [
+          "m",
+          "n"
+        ]
+      },
+      {
+        "label": "returns a promise",
+        "expression": "schedule([['z', 1]]).promise instanceof Promise",
+        "expected": true
+      }
+    ],
+    "hints": [
+      "Create the promise with new Promise and keep its resolve function in a variable.",
+      "Store every timer id in an array; each callback pushes its name and resolves when the count reaches items.length.",
+      "cancel clears all ids and resolves with the current list; a settled flag prevents double resolution."
+    ],
+    "solution_code": "function schedule(items) {\n  const fired = [];\n  const ids = [];\n  let settled = false;\n  let resolveDone;\n  const promise = new Promise((resolve) => {\n    resolveDone = resolve;\n  });\n  const finish = () => {\n    if (settled) return;\n    settled = true;\n    resolveDone(fired);\n  };\n  if (items.length === 0) finish();\n  for (const [name, delay] of items) {\n    ids.push(setTimeout(() => {\n      fired.push(name);\n      if (fired.length === items.length) finish();\n    }, delay));\n  }\n  return {\n    promise,\n    cancel() {\n      ids.forEach(clearTimeout);\n      finish();\n    },\n  };\n}",
+    "explanation": "Every timer is queued up front, so the event loop decides the firing order by delay (and by queue order for equal delays). Keeping the ids allows cancellation, and a settled flag guarantees the promise resolves exactly once whether completion or cancel comes first.",
+    "complexity": "O(n) timers"
+  },
+  {
+    "slug": "fetch-json-helper",
+    "title": "fetch JSON helper",
+    "topic": "Async JavaScript",
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "is_premium": true,
+    "position": 29,
+    "summary": "Check response.ok, parse JSON, and surface HTTP errors.",
+    "prompt": "Write getJSON(url, options = {}, fetchImpl = globalThis.fetch). Call fetchImpl(url, options). If the response's ok property is false, throw an Error whose message is `Request failed: ${status}` and whose cause is the response. Otherwise return the result of await response.json(). If fetchImpl itself rejects, let the rejection propagate unchanged. Also write postJSON(url, body, fetchImpl) that calls getJSON with method 'POST', a 'Content-Type': 'application/json' header, and the JSON-encoded body.",
+    "contract": {
+      "signature": "getJSON(url: string, options?: object, fetchImpl?: Function): Promise<any>; postJSON(url: string, body: any, fetchImpl?: Function): Promise<any>",
+      "params": [],
+      "returns": "parsed JSON"
+    },
+    "constraints": [
+      "Do not read the body when ok is false",
+      "Tests inject a fake fetch; do not perform real network requests"
+    ],
+    "starter_code": "async function getJSON(url, options = {}, fetchImpl = globalThis.fetch) {\n  // Fetch, check ok, parse JSON.\n}\n\nasync function postJSON(url, body, fetchImpl = globalThis.fetch) {\n  // Delegate to getJSON with POST settings.\n}",
+    "tests": [
+      {
+        "label": "returns parsed json",
+        "expression": "getJSON('/x', {}, async () => ({ ok: true, status: 200, json: async () => ({ id: 1 }) }))",
+        "expected": {
+          "id": 1
+        }
+      },
+      {
+        "label": "throws on 404",
+        "expression": "getJSON('/x', {}, async () => ({ ok: false, status: 404, json: async () => ({}) })).then(() => 'no throw', (e) => e.message)",
+        "expected": "Request failed: 404"
+      },
+      {
+        "label": "passes url and options through",
+        "expression": "(async () => { let seen; await getJSON('/items?x=1', { method: 'GET' }, async (url, opts) => { seen = [url, opts.method]; return { ok: true, status: 200, json: async () => [] }; }); return seen; })()",
+        "expected": [
+          "/items?x=1",
+          "GET"
+        ]
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "error cause is the response",
+        "expression": "getJSON('/x', {}, async () => ({ ok: false, status: 500, json: async () => ({}) })).then(() => null, (e) => e.cause.status)",
+        "expected": 500
+      },
+      {
+        "label": "body not read on error",
+        "expression": "(async () => { let read = false; await getJSON('/x', {}, async () => ({ ok: false, status: 400, json: async () => { read = true; return {}; } })).catch(() => {}); return read; })()",
+        "expected": false
+      },
+      {
+        "label": "network rejection propagates",
+        "expression": "getJSON('/x', {}, async () => { throw new TypeError('offline'); }).then(() => 'no throw', (e) => e.name)",
+        "expected": "TypeError"
+      },
+      {
+        "label": "postJSON sends method, header and body",
+        "expression": "(async () => { let seen; await postJSON('/o', { a: 1 }, async (url, opts) => { seen = opts; return { ok: true, status: 201, json: async () => ({}) }; }); return [seen.method, seen.headers['Content-Type'], seen.body]; })()",
+        "expected": [
+          "POST",
+          "application/json",
+          "{\"a\":1}"
+        ]
+      }
+    ],
+    "hints": [
+      "await fetchImpl(url, options) then check response.ok before touching the body.",
+      "new Error(message, { cause: response }) attaches the response.",
+      "postJSON is a one-liner that builds the options object and calls getJSON."
+    ],
+    "solution_code": "async function getJSON(url, options = {}, fetchImpl = globalThis.fetch) {\n  const response = await fetchImpl(url, options);\n  if (!response.ok) {\n    throw new Error(`Request failed: ${response.status}`, { cause: response });\n  }\n  return response.json();\n}\n\nasync function postJSON(url, body, fetchImpl = globalThis.fetch) {\n  return getJSON(url, {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify(body),\n  }, fetchImpl);\n}",
+    "explanation": "fetch resolves for HTTP error statuses, so the helper turns them into thrown errors while leaving genuine network failures to propagate. Injecting fetchImpl makes the helper testable without a network.",
+    "complexity": "O(1) plus the cost of the request"
+  },
+  {
+    "slug": "module-registry",
+    "title": "Module registry (single evaluation)",
+    "topic": "Modules",
+    "difficulty": 2,
+    "estimated_minutes": 16,
+    "is_premium": true,
+    "position": 30,
+    "summary": "Simulate how a module loader evaluates each module once and shares its exports.",
+    "prompt": "Write createRegistry(). It returns { define, require } where define(name, factory) registers a module factory (a function receiving require and returning the module's exports) and require(name) returns that module's exports, evaluating the factory at most once per name, even if required many times or from other modules. Requiring an undefined module throws an Error with message `Module not found: ${name}`. Redefining a name after it has been required has no effect on the cached exports.",
+    "contract": {
+      "signature": "createRegistry(): { define(name: string, factory: (require) => any): void; require(name: string): any }",
+      "params": [],
+      "returns": "registry object"
+    },
+    "constraints": [
+      "Factories run lazily, on first require",
+      "Each factory runs at most once"
+    ],
+    "starter_code": "function createRegistry() {\n  // Return { define, require }.\n}",
+    "tests": [
+      {
+        "label": "evaluates once",
+        "expression": "(() => { const r = createRegistry(); let runs = 0; r.define('a', () => { runs++; return { v: 1 }; }); r.require('a'); r.require('a'); return runs; })()",
+        "expected": 1
+      },
+      {
+        "label": "shares exports",
+        "expression": "(() => { const r = createRegistry(); r.define('c', () => ({ n: 0 })); r.require('c').n = 5; return r.require('c').n; })()",
+        "expected": 5
+      },
+      {
+        "label": "missing module throws",
+        "expression": "(() => { const r = createRegistry(); try { r.require('nope'); return 'no throw'; } catch (e) { return e.message; } })()",
+        "expected": "Module not found: nope"
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "lazy evaluation",
+        "expression": "(() => { const r = createRegistry(); let runs = 0; r.define('lazy', () => { runs++; return {}; }); return runs; })()",
+        "expected": 0
+      },
+      {
+        "label": "dependencies via require",
+        "expression": "(() => { const r = createRegistry(); r.define('math', () => ({ double: (n) => n * 2 })); r.define('app', (req) => ({ result: req('math').double(21) })); return r.require('app').result; })()",
+        "expected": 42
+      },
+      {
+        "label": "redefine after require ignored",
+        "expression": "(() => { const r = createRegistry(); r.define('x', () => ({ v: 1 })); r.require('x'); r.define('x', () => ({ v: 2 })); return r.require('x').v; })()",
+        "expected": 1
+      }
+    ],
+    "hints": [
+      "Keep two Maps: factories and cache (evaluated exports).",
+      "require checks the cache first, then runs the factory and stores the result before returning.",
+      "Pass require itself into the factory so modules can depend on each other."
+    ],
+    "solution_code": "function createRegistry() {\n  const factories = new Map();\n  const cache = new Map();\n  function require(name) {\n    if (cache.has(name)) return cache.get(name);\n    const factory = factories.get(name);\n    if (!factory) throw new Error(`Module not found: ${name}`);\n    const exports = factory(require);\n    cache.set(name, exports);\n    return exports;\n  }\n  function define(name, factory) {\n    if (!cache.has(name)) factories.set(name, factory);\n  }\n  return { define, require };\n}",
+    "explanation": "This is the essence of a module system: a registry of factories and a cache of evaluated exports. Because the cache is checked first, every importer receives the same exports object, which is exactly why ES modules share state.",
+    "complexity": "O(1) per define/require after the first evaluation"
+  },
+  {
+    "slug": "todo-store",
+    "title": "Todo store with a storage adapter",
+    "topic": "State",
+    "difficulty": 2,
+    "estimated_minutes": 22,
+    "is_premium": true,
+    "position": 31,
+    "summary": "Immutable state updates plus a safe load/save layer.",
+    "prompt": "Write createTodoStore(storage, key = 'todos'). storage has getItem(key) and setItem(key, value) like localStorage and may throw or return malformed data. The store exposes: getState() returning the current array of { id, text, done }; add(text) creating a todo with a unique id and done false; toggle(id); remove(id); and clearDone(). Every change must produce a new array (never mutate the previous state array or its objects), then save the JSON to storage, swallowing any storage errors. On creation, load from storage and fall back to [] when the value is missing, invalid JSON, or not an array.",
+    "contract": {
+      "signature": "createTodoStore(storage: { getItem(k): string | null; setItem(k, v): void }, key?: string): { getState(): Todo[]; add(text): Todo; toggle(id): void; remove(id): void; clearDone(): void }",
+      "params": [],
+      "returns": "store"
+    },
+    "constraints": [
+      "State updates are immutable",
+      "Storage failures never throw out of the store"
+    ],
+    "starter_code": "function createTodoStore(storage, key = 'todos') {\n  // Return the store API.\n}",
+    "tests": [
+      {
+        "label": "add and toggle",
+        "expression": "(() => { const mem = {}; const s = createTodoStore({ getItem: (k) => mem[k] ?? null, setItem: (k, v) => { mem[k] = v; } }); const t = s.add('tea'); s.toggle(t.id); return s.getState().map((x) => [x.text, x.done]); })()",
+        "expected": [
+          [
+            "tea",
+            true
+          ]
+        ]
+      },
+      {
+        "label": "loads saved state",
+        "expression": "(() => { const mem = { todos: JSON.stringify([{ id: 'a', text: 'x', done: false }]) }; const s = createTodoStore({ getItem: (k) => mem[k] ?? null, setItem: () => {} }); return s.getState().length; })()",
+        "expected": 1
+      },
+      {
+        "label": "corrupt storage falls back",
+        "expression": "createTodoStore({ getItem: () => '{bad', setItem: () => {} }).getState()",
+        "expected": []
+      }
+    ],
+    "hidden_tests": [
+      {
+        "label": "immutability",
+        "expression": "(() => { const s = createTodoStore({ getItem: () => null, setItem: () => {} }); const t = s.add('a'); const before = s.getState(); s.toggle(t.id); return [before === s.getState(), before[0].done, s.getState()[0].done]; })()",
+        "expected": [
+          false,
+          false,
+          true
+        ]
+      },
+      {
+        "label": "remove and clearDone",
+        "expression": "(() => { const s = createTodoStore({ getItem: () => null, setItem: () => {} }); const a = s.add('a'); const b = s.add('b'); s.add('c'); s.toggle(a.id); s.remove(b.id); s.clearDone(); return s.getState().map((x) => x.text); })()",
+        "expected": [
+          "c"
+        ]
+      },
+      {
+        "label": "storage errors swallowed",
+        "expression": "(() => { const s = createTodoStore({ getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('full'); } }); s.add('ok'); return s.getState().length; })()",
+        "expected": 1
+      },
+      {
+        "label": "non-array storage ignored",
+        "expression": "createTodoStore({ getItem: () => '{\"not\":\"array\"}', setItem: () => {} }).getState()",
+        "expected": []
+      },
+      {
+        "label": "unique ids",
+        "expression": "(() => { const s = createTodoStore({ getItem: () => null, setItem: () => {} }); const ids = [s.add('a').id, s.add('b').id, s.add('c').id]; return new Set(ids).size; })()",
+        "expected": 3
+      }
+    ],
+    "hints": [
+      "Write a private setState(next) that assigns, then tries to save inside try/catch.",
+      "Use map with spread for toggle and filter for remove/clearDone so old objects are never changed.",
+      "For ids, a simple counter or crypto.randomUUID() (guard if unavailable) both satisfy uniqueness."
+    ],
+    "solution_code": "function createTodoStore(storage, key = 'todos') {\n  let state = [];\n  let seq = 0;\n  const makeId = () => (globalThis.crypto?.randomUUID ? crypto.randomUUID() : `t${Date.now()}-${++seq}`);\n\n  try {\n    const raw = storage.getItem(key);\n    const parsed = raw ? JSON.parse(raw) : [];\n    if (Array.isArray(parsed)) state = parsed;\n  } catch {\n    state = [];\n  }\n\n  function setState(next) {\n    state = next;\n    try {\n      storage.setItem(key, JSON.stringify(state));\n    } catch {\n      // storage unavailable; keep working in memory\n    }\n  }\n\n  return {\n    getState: () => state,\n    add(text) {\n      const todo = { id: makeId(), text, done: false };\n      setState([...state, todo]);\n      return todo;\n    },\n    toggle(id) {\n      setState(state.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));\n    },\n    remove(id) {\n      setState(state.filter((t) => t.id !== id));\n    },\n    clearDone() {\n      setState(state.filter((t) => !t.done));\n    },\n  };\n}",
+    "explanation": "All mutations go through one setState, so persistence and immutability are guaranteed in one place. Loading and saving are wrapped in try/catch because storage can be disabled, full, or corrupt, and the app should keep working in memory.",
+    "complexity": "O(n) per update"
+  }
+]

@@ -1,0 +1,662 @@
+[
+  {
+    "slug": "debugging-with-devtools",
+    "module": "errors-and-debugging",
+    "position": 2,
+    "difficulty": 1,
+    "estimated_minutes": 14,
+    "access_level": "pro",
+    "title": "Debugging with DevTools",
+    "summary": "Read a stack trace, set breakpoints, and use the console methods that make bugs visible instead of guessing.",
+    "objectives": [
+      "Read a stack trace from the top frame down and locate the failing line",
+      "Use console.table, console.group and console.time beyond console.log",
+      "Pause with a breakpoint or debugger statement and inspect scope"
+    ],
+    "prerequisites": [
+      "try-catch-throw-and-error-types"
+    ],
+    "practice_link": "find-the-bug-off-by-one",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Make the program show you",
+        "body": "A **stack trace** lists the functions that were active when an error was thrown, most recent first. Read the top frame for *where* it failed, then walk down to see *how the code got there*. Framework and library frames can be ignored at first; look for the first frame in your own files.\n\nThe console does more than `log`. `console.error` and `console.warn` colour and filter differently. `console.table(arrayOfObjects)` prints a grid. `console.group(label)` / `console.groupEnd()` indents related output. `console.time(label)` / `console.timeEnd(label)` measure elapsed time. `console.assert(condition, message)` prints only when the condition is false. Logging an object shows a *live* reference, so expand it immediately or log `structuredClone(obj)` if it changes later.\n\n**Breakpoints** stop execution at a line so you can inspect every variable in scope, step over or into calls, and watch expressions. Set them by clicking a line number in the Sources panel or by writing a `debugger;` statement in code (remove it before committing). Conditional breakpoints pause only when an expression is true, which is invaluable inside loops.\n\nThe Network panel shows every request with its status, headers, and response; the Elements panel shows the live DOM and computed styles. A systematic loop, reproduce, isolate, form a hypothesis, test it, beats scattering `console.log` everywhere."
+      },
+      {
+        "type": "example",
+        "title": "Reading a stack trace",
+        "body": "The error was thrown in `formatPrice`, called from `renderRow`, called from `renderTable`. Start at the top.",
+        "code": "// TypeError: Cannot read properties of undefined (reading 'toFixed')\n//     at formatPrice (cart.js:12:24)\n//     at renderRow (cart.js:20:18)\n//     at Array.map (<anonymous>)\n//     at renderTable (cart.js:27:16)\n\nfunction formatPrice(item) {\n  return item.price.toFixed(2); // line 12: item.price is undefined for one row\n}",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Console beyond log",
+        "body": "Grouped, tabular, timed output that is easy to scan.",
+        "code": "const rows = [\n  { sku: 'T1', price: 40 },\n  { sku: 'C9', price: undefined },\n];\n\nconsole.group('Cart check');\nconsole.table(rows);\nconsole.time('validate');\nrows.forEach((row) => console.assert(typeof row.price === 'number', `bad price for ${row.sku}`));\nconsole.timeEnd('validate');\nconsole.groupEnd();",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Reading the bottom of a stack trace first.\n- Logging an object, mutating it, and being confused that the console shows the new value.\n- Leaving `debugger` statements or noisy logs in committed code.\n- Changing several things at once, so it is unclear which change fixed the bug."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Debugging rounds hand you broken code and watch your process. Narrate it: \"the trace points at line 12; `item.price` is undefined for one row; let me find which row and why.\" Process matters more than speed."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Find the bug: off by one** gives you failing tests and a stack trace to work from."
+      }
+    ],
+    "sources": [
+      {
+        "title": "console — Web APIs",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/console",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "debugger — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/debugger",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Error.prototype.stack",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/stack",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "selecting-and-updating-elements",
+    "module": "dom-basics",
+    "position": 1,
+    "difficulty": 1,
+    "estimated_minutes": 16,
+    "access_level": "free",
+    "title": "Selecting & updating elements",
+    "summary": "Find elements with querySelector, change their text, attributes, and classes, and understand why textContent is safer than innerHTML.",
+    "objectives": [
+      "Select one or many elements with CSS selectors",
+      "Update text, attributes, and classes without rebuilding HTML",
+      "Explain the security difference between textContent and innerHTML"
+    ],
+    "prerequisites": [
+      "object-literals-and-property-access"
+    ],
+    "practice_link": "render-status-badge",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "The DOM is a live object tree",
+        "body": "The browser parses HTML into the **Document Object Model**: a tree of element objects that JavaScript can read and change. `document.querySelector(selector)` returns the first element matching a CSS selector (or `null`); `querySelectorAll` returns a static `NodeList` of all matches, which supports `forEach` and can be spread into an array. `getElementById` is a fast special case.\n\nTo change what an element shows, set `element.textContent` for plain text. `innerHTML` parses a string as HTML, which is convenient for markup you wrote yourself but dangerous with anything that came from a user or an API, because a string like `<img onerror=…>` executes. Prefer `textContent`, or build elements and append them.\n\nAttributes are read and written with `getAttribute` / `setAttribute` / `removeAttribute`; common ones also exist as properties (`input.value`, `img.src`, `link.href`). `dataset` exposes `data-*` attributes as camel-cased properties. Styling changes belong in classes: `classList.add`, `remove`, `toggle`, and `contains` keep CSS in CSS. Inline `element.style.x` is fine for values computed at runtime, such as a progress width.\n\nA `NodeList` from `querySelectorAll` is a snapshot; elements added later are not in it. The `HTMLCollection` from `getElementsByClassName` is live, which occasionally surprises people iterating while adding."
+      },
+      {
+        "type": "example",
+        "title": "Select, then update text and classes",
+        "body": "Text goes through `textContent`; visual state goes through a class.",
+        "code": "const badge = document.querySelector('#status');\nconst rows = document.querySelectorAll('.order-row');\n\nbadge.textContent = `${rows.length} orders`;\nbadge.classList.toggle('is-empty', rows.length === 0);\nbadge.setAttribute('aria-live', 'polite');\n\nrows.forEach((row, index) => {\n  row.dataset.index = String(index);\n  row.classList.add(index % 2 ? 'odd' : 'even');\n});",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "textContent versus innerHTML",
+        "body": "The same untrusted string is harmless as text and dangerous as HTML.",
+        "code": "const untrusted = '<img src=x onerror=\"alert(1)\">';\nconst out = document.querySelector('#out');\n\nout.textContent = untrusted; // shows the literal characters; nothing runs\n// out.innerHTML = untrusted; // would create an <img> whose onerror executes\n\nconsole.log(out.children.length); // 0",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Running the script before the elements exist (put it at the end of body or use `defer`).\n- Assigning user input to `innerHTML`.\n- Forgetting the `#` or `.` in a selector and getting `null`.\n- Toggling inline styles when a class would keep the styling in CSS."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"What is the difference between innerHTML and textContent?\" is asked constantly and is really a security question. Also expect \"how do you select elements?\" and a small task like toggling a class on click."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Render a status badge** is a DOM-free helper that produces the exact class list and text a badge should show."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Document.querySelector()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Document/querySelector",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Node.textContent",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Element.classList",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Element/classList",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "creating-and-removing-nodes",
+    "module": "dom-basics",
+    "position": 2,
+    "difficulty": 2,
+    "estimated_minutes": 16,
+    "access_level": "free",
+    "title": "Creating & removing nodes",
+    "summary": "Build elements in JavaScript, insert them where you want, remove them cleanly, and render lists without rebuilding the whole page.",
+    "objectives": [
+      "Create elements with createElement and append them with append and prepend",
+      "Insert relative to another element and remove nodes with remove()",
+      "Render an array of data into a list efficiently with a DocumentFragment"
+    ],
+    "prerequisites": [
+      "selecting-and-updating-elements",
+      "map-filter-reduce"
+    ],
+    "practice_link": "build-list-markup",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Build, insert, remove",
+        "body": "`document.createElement('li')` makes a detached element. Set its `textContent`, classes, and attributes, then attach it with `parent.append(child)` (end) or `parent.prepend(child)` (start). Both accept several nodes or strings at once. `element.before(node)` and `element.after(node)` insert siblings, and `element.replaceWith(node)` swaps it out. To remove, call `element.remove()`; the older `parent.removeChild(child)` still works.\n\nAppending an element that is already in the document **moves** it rather than copying it. Use `element.cloneNode(true)` when you want a copy, and remember that clones do not carry event listeners added with `addEventListener`.\n\nRendering a list means turning data into elements. Building each `<li>` and appending it one by one triggers layout work repeatedly; building them inside a `DocumentFragment` and appending the fragment once is cheaper and is the pattern frameworks optimise internally. When the data changes, the simplest correct approach at this level is to clear the container (`container.replaceChildren()`) and render again.\n\nA `<template>` element in the HTML holds inert markup you can clone with `template.content.cloneNode(true)`, which keeps structure in HTML and logic in JavaScript."
+      },
+      {
+        "type": "example",
+        "title": "Rendering a list from data",
+        "body": "One fragment, one append.",
+        "code": "const items = [\n  { id: 1, name: 'Tea', done: true },\n  { id: 2, name: 'Cake', done: false },\n];\nconst list = document.querySelector('#items');\n\nconst fragment = document.createDocumentFragment();\nfor (const item of items) {\n  const li = document.createElement('li');\n  li.textContent = item.name;\n  li.dataset.id = String(item.id);\n  li.classList.toggle('done', item.done);\n  fragment.append(li);\n}\nlist.replaceChildren(fragment);\n\nconsole.log(list.children.length); // 2",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Moving, cloning, removing",
+        "body": "`append` moved the element; `cloneNode` made a second one; `remove` took it out.",
+        "code": "const first = list.firstElementChild;\nlist.append(first);              // moved to the end, still only 2 children\nconsole.log(list.children.length); // 2\n\nconst copy = first.cloneNode(true);\nlist.prepend(copy);\nconsole.log(list.children.length); // 3\n\ncopy.remove();\nconsole.log(list.children.length); // 2",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Building HTML strings with user data and assigning to `innerHTML`.\n- Expecting `append` to copy an element that is already in the page.\n- Adding a listener to each generated item instead of one listener on the list (see event delegation next lesson).\n- Appending inside a loop on large lists without a fragment."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "A typical task: \"given this array, render it as a list, then add a remove button per row.\" Interviewers look for `createElement` over string concatenation, and for a single delegated listener."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Build list markup** produces the element structure for a list from data and checks the classes and attributes."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Document.createElement()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Document/createElement",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "DocumentFragment",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/DocumentFragment",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Element.replaceChildren()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Element/replaceChildren",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "events-and-the-event-object",
+    "module": "dom-basics",
+    "position": 3,
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "access_level": "pro",
+    "title": "Events & the event object",
+    "summary": "Listen for user actions, read the event object, stop default behaviour, and handle many elements with one listener through delegation.",
+    "objectives": [
+      "Attach and remove listeners with addEventListener",
+      "Use event.target, currentTarget, and preventDefault correctly",
+      "Explain bubbling and implement event delegation"
+    ],
+    "prerequisites": [
+      "creating-and-removing-nodes",
+      "methods-and-this-basics"
+    ],
+    "practice_link": "event-delegation-router",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Listen, inspect, delegate",
+        "body": "`element.addEventListener(type, handler, options)` registers a function to run when an event of that type reaches the element. You can add several listeners for the same type, and remove one with `removeEventListener` only if you pass the *same function reference*. The `{ once: true }` option removes a listener after its first call.\n\nThe handler receives an **event object**. `event.type` is the name; `event.target` is the element where the event *originated*; `event.currentTarget` is the element whose listener is running. `event.preventDefault()` cancels the browser's default action, such as a form submitting or a link navigating. Keyboard events expose `event.key`; mouse events expose coordinates and `button`.\n\nEvents **bubble**: after firing on the target, most events fire on each ancestor up to `document`. That enables **delegation**, attaching one listener to a parent and checking `event.target.closest('button')` to see which child was involved. Delegation works for elements added later and avoids thousands of listeners in big lists. `event.stopPropagation()` halts bubbling; use it sparingly because it can break other delegated handlers.\n\nInside a regular function handler, `this` is `currentTarget`; inside an arrow handler it is whatever the surrounding scope had, so prefer `event.currentTarget` and avoid depending on `this`."
+      },
+      {
+        "type": "example",
+        "title": "Form submit with preventDefault",
+        "body": "The page does not reload; the input value is read and cleared.",
+        "code": "const form = document.querySelector('#add-item');\nconst input = form.querySelector('input[name=\"item\"]');\nconst list = document.querySelector('#items');\n\nform.addEventListener('submit', (event) => {\n  event.preventDefault();\n  const name = input.value.trim();\n  if (!name) return;\n  const li = document.createElement('li');\n  li.textContent = name;\n  const button = document.createElement('button');\n  button.textContent = 'Remove';\n  button.dataset.action = 'remove';\n  li.append(' ', button);\n  list.append(li);\n  input.value = '';\n});",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "One delegated listener for every row",
+        "body": "Rows added later are handled too, because the listener sits on the list.",
+        "code": "list.addEventListener('click', (event) => {\n  const button = event.target.closest('button[data-action=\"remove\"]');\n  if (!button || !list.contains(button)) return;\n  button.closest('li').remove();\n});",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- `removeEventListener` with a new arrow function, which never matches.\n- Using `event.target` when you meant the element with the listener (`currentTarget`).\n- Forgetting `preventDefault` on `submit` and wondering why the page reloads.\n- Calling `stopPropagation` by habit and breaking analytics or other delegated handlers."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"Explain event bubbling and delegation\" and \"target vs currentTarget\" are asked at almost every level. Implementing a delegated click handler on a list is a classic live-coding task."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Event delegation router** is a pure function that maps a clicked element's attributes to an action, the core of a delegated handler."
+      }
+    ],
+    "sources": [
+      {
+        "title": "EventTarget.addEventListener()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Event bubbling — Learn web development",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Scripting/Event_bubbling",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Event.preventDefault()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Event/preventDefault",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "forms-and-user-input",
+    "module": "browser-essentials",
+    "position": 1,
+    "difficulty": 2,
+    "estimated_minutes": 16,
+    "access_level": "free",
+    "title": "Forms & user input",
+    "summary": "Read values from inputs, selects, and checkboxes, validate them, and show errors without a page reload.",
+    "objectives": [
+      "Read values from text inputs, checkboxes, radios, and selects",
+      "Use FormData to collect a whole form",
+      "Combine built-in constraint validation with custom checks"
+    ],
+    "prerequisites": [
+      "events-and-the-event-object"
+    ],
+    "practice_link": "validate-signup-form",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Values in, feedback out",
+        "body": "Every form control exposes its state as a property. Text-like inputs and `<textarea>` use `.value` (always a string, even for `type=\"number\"`; use `.valueAsNumber` when you need a number). Checkboxes and radios use `.checked`. A `<select>` gives `.value` for the chosen option, and for `multiple` you read `selectedOptions`. Files live in `input.files`.\n\n`new FormData(form)` collects every named control in one object: `formData.get('email')` reads one field, and `Object.fromEntries(formData)` turns it into a plain object for single-valued fields. This is the tidiest way to read a form on submit.\n\nThe browser has **constraint validation** built in: attributes such as `required`, `minlength`, `pattern`, and `type=\"email\"` are checked automatically, `form.checkValidity()` reports the result, and `input.setCustomValidity(message)` adds your own rule. Adding `novalidate` to the form lets you run the checks yourself and render errors in your own markup, which is what most apps do for consistent styling.\n\nListen to `input` for keystroke-by-keystroke changes, `change` when the value is committed (blur, checkbox toggle, select), and `submit` on the form. Always validate on the server too; client-side checks are for user experience, not security."
+      },
+      {
+        "type": "example",
+        "title": "Reading a form with FormData",
+        "body": "Number inputs still arrive as strings; convert explicitly.",
+        "code": "const form = document.querySelector('#signup');\n\nform.addEventListener('submit', (event) => {\n  event.preventDefault();\n  const data = Object.fromEntries(new FormData(form));\n  const age = Number(data.age);\n  const newsletter = form.elements.newsletter.checked;\n\n  console.log(data.email, age, newsletter);\n  // 'a@b.c' 29 true\n});",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Custom validation with built-in hooks",
+        "body": "The custom message participates in `checkValidity` like any built-in rule.",
+        "code": "const password = form.elements.password;\nconst confirm = form.elements.confirm;\n\nconfirm.addEventListener('input', () => {\n  confirm.setCustomValidity(confirm.value === password.value ? '' : 'Passwords do not match');\n});\n\nform.addEventListener('submit', (event) => {\n  if (!form.checkValidity()) {\n    event.preventDefault();\n    form.querySelector(':invalid')?.focus();\n  }\n});",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Treating `input.value` as a number.\n- Reading `.value` of a checkbox instead of `.checked`.\n- Validating only on the client.\n- Listening to `change` on a text field and expecting per-keystroke updates."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Frontend interviews love a small form task: validate, show errors, prevent the reload. Mentioning `FormData`, constraint validation, and server-side validation shows breadth."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Validate a sign-up form** implements the rules as a pure function returning an errors object."
+      },
+      {
+        "type": "summary",
+        "title": "Key takeaways",
+        "body": "Read text-like controls with .value (always a string), checkboxes and radios with .checked, and whole forms with FormData. Listen to input for live changes, change for committed values, and submit on the form itself, calling preventDefault to stay on the page. Let the browser's constraint validation do the routine checks, add custom rules with setCustomValidity, and always validate again on the server because client checks are for experience, not security."
+      }
+    ],
+    "sources": [
+      {
+        "title": "FormData",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/FormData",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Client-side form validation — Learn web development",
+        "url": "https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "HTML Living Standard: Constraint validation",
+        "url": "https://html.spec.whatwg.org/multipage/form-control-infrastructure.html#constraint-validation",
+        "publisher": "WHATWG"
+      }
+    ]
+  },
+  {
+    "slug": "timers-and-the-event-loop",
+    "module": "browser-essentials",
+    "position": 2,
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "access_level": "free",
+    "title": "Timers & the event loop",
+    "summary": "Schedule work with setTimeout and setInterval and understand the event loop model that decides when callbacks actually run.",
+    "objectives": [
+      "Use setTimeout, setInterval, and clearTimeout correctly",
+      "Explain call stack, task queue, and microtask queue in one diagram",
+      "Predict output order for code mixing sync work, timers, and promises"
+    ],
+    "prerequisites": [
+      "promises-and-async-flow",
+      "callbacks-and-higher-order-functions"
+    ],
+    "practice_link": "timed-sequence",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "One thread, several queues",
+        "body": "JavaScript runs on a single thread with a **call stack**. When you call `setTimeout(fn, 500)`, the browser starts a timer and returns immediately; `fn` is placed on the **task queue** once the delay has passed. The **event loop** takes the next task only when the call stack is empty, so a delay is a minimum, not a guarantee. `setTimeout(fn, 0)` still waits for the current work to finish. `setInterval` repeats until `clearInterval`; both return an id you pass to `clearTimeout` / `clearInterval` to cancel.\n\nPromise reactions (`.then`, `await` continuations) go on the **microtask queue**, which is drained completely after each task and before the browser renders. That is why a resolved promise's callback runs before a `setTimeout(…, 0)` callback, and why a long chain of microtasks can starve rendering.\n\nThe order for a typical snippet is therefore: all synchronous code, then every queued microtask, then the next task (a timer or an event), then microtasks again, and so on. Long synchronous loops block everything, including clicks and animations, which is what \"do not block the main thread\" means.\n\nA common practical use is **debouncing**: reset a timer on every input event and run the expensive work only after the user pauses."
+      },
+      {
+        "type": "example",
+        "title": "Predicting order",
+        "body": "Sync first, microtask second, timer last, even with a zero delay.",
+        "code": "console.log('start');\n\nsetTimeout(() => console.log('timeout'), 0);\n\nPromise.resolve().then(() => console.log('microtask'));\n\nconsole.log('end');\n\n// start\n// end\n// microtask\n// timeout",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "A countdown with clearInterval",
+        "body": "The id returned by `setInterval` is what stops it.",
+        "code": "function countdown(seconds, onTick, onDone) {\n  let remaining = seconds;\n  const id = setInterval(() => {\n    remaining -= 1;\n    onTick(remaining);\n    if (remaining === 0) {\n      clearInterval(id);\n      onDone();\n    }\n  }, 1000);\n  return () => clearInterval(id); // cancel function\n}\n\nconst cancel = countdown(3, (n) => console.log(n), () => console.log('done'));\n// cancel(); would stop it early",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Believing `setTimeout(fn, 0)` runs immediately.\n- Forgetting to clear intervals when a component or page section goes away, leaking work.\n- Passing `fn()` (the call) instead of `fn` to `setTimeout`.\n- Running heavy synchronous loops and wondering why the UI freezes."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Output-order questions mixing `setTimeout`, promises, and `console.log` appear in most JavaScript interviews. Draw the stack, microtask queue, and task queue; walk through the snippet in that order."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Timed sequence** schedules callbacks with setTimeout, reports the order they fire, and supports cancelling the rest."
+      }
+    ],
+    "sources": [
+      {
+        "title": "HTML Living Standard: Event loops",
+        "url": "https://html.spec.whatwg.org/multipage/webappapis.html#event-loops",
+        "publisher": "WHATWG"
+      },
+      {
+        "title": "setTimeout() — Web APIs",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/setTimeout",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Using microtasks in JavaScript",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/HTML_DOM_API/Microtask_guide",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "fetch-and-async-await-basics",
+    "module": "browser-essentials",
+    "position": 3,
+    "difficulty": 2,
+    "estimated_minutes": 20,
+    "access_level": "pro",
+    "title": "fetch & async/await basics",
+    "summary": "Make a network request, check the response, parse JSON, and handle failure with async/await.",
+    "objectives": [
+      "Write an async function that fetches JSON and returns parsed data",
+      "Check response.ok because fetch only rejects on network failure",
+      "Handle errors and loading state around a request"
+    ],
+    "prerequisites": [
+      "promises-and-async-flow",
+      "json-and-serialization",
+      "try-catch-throw-and-error-types"
+    ],
+    "practice_link": "fetch-json-helper",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Request, response, body",
+        "body": "`fetch(url, options)` starts an HTTP request and returns a promise for a **Response**. The promise resolves as soon as headers arrive, and it resolves even for `404` or `500`; it rejects only when the request could not be made at all (network down, blocked by CORS, aborted). So the first thing to do with a response is check `response.ok` (status 200–299) or `response.status`.\n\nThe body is read with another promise-returning method: `response.json()`, `response.text()`, or `response.blob()`. The body can be read only once. `json()` throws if the body is not valid JSON, which is why an error page returned with a 500 can produce a `SyntaxError` if you skipped the `ok` check.\n\n`async` functions let you write this as straight-line code: `await` pauses the function until the promise settles and returns its value, or throws its rejection so `try/catch` works. An `async` function always returns a promise, so callers `await` it too. Run independent requests together with `Promise.all([...])` rather than awaiting them one after another.\n\nTo send data, pass `method: 'POST'`, a `headers` object with `'Content-Type': 'application/json'`, and `body: JSON.stringify(payload)`. An `AbortController` lets you cancel a request, for example when the user types a new search before the previous one returns."
+      },
+      {
+        "type": "example",
+        "title": "A reusable JSON helper",
+        "body": "Checks `ok`, parses JSON, and turns HTTP errors into thrown errors with status.",
+        "code": "async function getJSON(url, options = {}) {\n  const response = await fetch(url, options);\n  if (!response.ok) {\n    throw new Error(`Request failed: ${response.status}`, { cause: response });\n  }\n  return response.json();\n}\n\nasync function loadMenu() {\n  try {\n    const [items, offers] = await Promise.all([\n      getJSON('/api/items'),\n      getJSON('/api/offers'),\n    ]);\n    console.log(items.length, offers.length);\n  } catch (error) {\n    console.error('Could not load menu', error.message);\n  }\n}",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Sending JSON",
+        "body": "Method, header, and a stringified body.",
+        "code": "async function createOrder(order) {\n  return getJSON('/api/orders', {\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: JSON.stringify(order),\n  });\n}",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Assuming `fetch` rejects on a 404.\n- Forgetting `await` in front of `response.json()` and getting a promise instead of data.\n- Awaiting independent requests sequentially.\n- Reading the body twice."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"What does fetch reject on?\" and \"how would you fetch two resources in parallel?\" are frequent. Writing the `getJSON` helper from memory, with the `ok` check, is a strong signal."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**fetch JSON helper** asks for exactly this wrapper, tested with a fake fetch."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Using the Fetch API",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Fetch Standard",
+        "url": "https://fetch.spec.whatwg.org/",
+        "publisher": "WHATWG"
+      },
+      {
+        "title": "async function — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "es-modules-import-export",
+    "module": "modules-and-persistence",
+    "position": 1,
+    "difficulty": 2,
+    "estimated_minutes": 15,
+    "access_level": "pro",
+    "title": "ES modules: import & export",
+    "summary": "Split code into files with named and default exports, understand module scope, and load modules in the browser.",
+    "objectives": [
+      "Write named and default exports and import them correctly",
+      "Explain module scope, strict mode, and single evaluation",
+      "Load a module in HTML with type=\"module\" and know what defer implies"
+    ],
+    "prerequisites": [
+      "declarations-expressions-arrows"
+    ],
+    "practice_link": "module-registry",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Files as modules",
+        "body": "An ES module is a file whose top-level bindings are private unless exported. **Named exports** (`export function add …`, `export const rate = …`) can be many per file and are imported by name in braces: `import { add, rate } from './math.js'`. A **default export** (`export default …`) is one per file and is imported with any local name: `import calc from './math.js'`. Rename with `as`, and gather everything with `import * as math from './math.js'`.\n\nModules are always in strict mode, have their own scope (no accidental globals), and are **evaluated once**: every importer shares the same instance, so a module-level variable acts as shared state. Imports are live bindings to the exporter's variables, not copies. Import and export statements are hoisted and resolved before the module body runs, so circular imports work but can expose values that are not initialised yet.\n\nIn the browser, load a module with `<script type=\"module\" src=\"app.js\">`. Module scripts are deferred automatically, so the DOM is ready when they run, and they are fetched with CORS rules, which is why opening a page from `file://` often fails and a local server is needed. Specifiers must be paths (`./`, `../`, `/`) or full URLs unless an import map defines bare names. `import()` as a function loads a module on demand and returns a promise, which is how bundlers split code."
+      },
+      {
+        "type": "example",
+        "title": "Named, default, and namespace imports",
+        "body": "One module, three ways to import from it.",
+        "code": "// math.js\nexport const TAX_RATE = 0.18;\nexport function withTax(amount) {\n  return amount * (1 + TAX_RATE);\n}\nexport default function formatINR(amount) {\n  return `₹${amount.toFixed(2)}`;\n}\n\n// app.js\nimport formatINR, { withTax, TAX_RATE as rate } from './math.js';\nimport * as math from './math.js';\n\nconsole.log(formatINR(withTax(100))); // '₹118.00'\nconsole.log(rate === math.TAX_RATE);   // true",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Single evaluation and shared state",
+        "body": "Both importers see the same counter because the module ran once.",
+        "code": "// counter.js\nlet count = 0;\nexport function increment() { return ++count; }\n\n// a.js\nimport { increment } from './counter.js';\nconsole.log(increment()); // 1\n\n// b.js\nimport { increment } from './counter.js';\nconsole.log(increment()); // 2 (same module instance)",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- `import { default } …` or braces around a default import.\n- Omitting the file extension or the `./` prefix in a browser specifier.\n- Expecting a top-level variable in a module to be a global.\n- Mixing `require` (CommonJS) with `import` in the same browser file."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"Named vs default export?\", \"what does type=module change?\", and \"are imports copies?\" are common. Knowing that modules are evaluated once and imports are live bindings answers several follow-ups at once."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Module registry** simulates a module's single-evaluation behaviour with a factory and a cache."
+      }
+    ],
+    "sources": [
+      {
+        "title": "JavaScript modules — JavaScript guide",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "export — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "HTML Living Standard: the script element (module scripts)",
+        "url": "https://html.spec.whatwg.org/multipage/scripting.html#the-script-element",
+        "publisher": "WHATWG"
+      }
+    ]
+  },
+  {
+    "slug": "localstorage-and-a-small-app",
+    "module": "modules-and-persistence",
+    "position": 2,
+    "difficulty": 2,
+    "estimated_minutes": 22,
+    "access_level": "pro",
+    "title": "localStorage & a small app",
+    "summary": "Persist data between visits with localStorage, structure a tiny app around state, render, and events, and bring the whole track together.",
+    "objectives": [
+      "Store and retrieve JSON in localStorage with safe defaults",
+      "Structure an app as state, a render function, and event handlers",
+      "Know the limits of localStorage and when it is the wrong tool"
+    ],
+    "prerequisites": [
+      "json-and-serialization",
+      "events-and-the-event-object",
+      "es-modules-import-export"
+    ],
+    "practice_link": "todo-store",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Persistence and a shape for small apps",
+        "body": "`localStorage` is a per-origin key/value store that survives page reloads and browser restarts. It stores **strings only**, so objects go through `JSON.stringify` on the way in and `JSON.parse` on the way out. `setItem`, `getItem` (returns `null` when missing), `removeItem`, and `clear` are synchronous. `sessionStorage` has the same API but lasts only for the tab.\n\nBecause it is synchronous, string-only, limited to a few megabytes, and readable by any script on the origin, localStorage is for small preferences and drafts, never for secrets or large data; `IndexedDB` handles big structured data and a server handles anything shared. Reads can throw in private modes or when storage is disabled, so wrap them in `try/catch` and fall back to defaults.\n\nA small app stays understandable when it has one **state** object, one **render** function that draws the whole UI from state, and event handlers that only change state and then call render. Saving is then one line inside a `setState` helper. This unidirectional shape is what every frontend framework formalises, so building it once by hand makes React and Angular much easier to learn.\n\nThe `storage` event fires in *other* tabs when a value changes, which is a simple way to keep two open tabs in sync."
+      },
+      {
+        "type": "example",
+        "title": "Load and save with safe defaults",
+        "body": "Missing or corrupt data falls back to an empty list instead of crashing.",
+        "code": "const KEY = 'todo:v1';\n\nfunction load() {\n  try {\n    const raw = localStorage.getItem(KEY);\n    const parsed = raw ? JSON.parse(raw) : [];\n    return Array.isArray(parsed) ? parsed : [];\n  } catch {\n    return [];\n  }\n}\n\nfunction save(todos) {\n  try {\n    localStorage.setItem(KEY, JSON.stringify(todos));\n  } catch {\n    // storage full or disabled: keep working in memory\n  }\n}",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "State, render, events",
+        "body": "Handlers change state and re-render; nothing else touches the DOM.",
+        "code": "let todos = load();\nconst list = document.querySelector('#todos');\nconst form = document.querySelector('#new-todo');\n\nfunction setState(next) {\n  todos = next;\n  save(todos);\n  render();\n}\n\nfunction render() {\n  list.replaceChildren(...todos.map((todo) => {\n    const li = document.createElement('li');\n    li.textContent = todo.text;\n    li.dataset.id = todo.id;\n    li.classList.toggle('done', todo.done);\n    return li;\n  }));\n}\n\nform.addEventListener('submit', (event) => {\n  event.preventDefault();\n  const text = form.elements.text.value.trim();\n  if (text) setState([...todos, { id: crypto.randomUUID(), text, done: false }]);\n  form.reset();\n});\n\nlist.addEventListener('click', (event) => {\n  const id = event.target.closest('li')?.dataset.id;\n  if (id) setState(todos.map((t) => (t.id === id ? { ...t, done: !t.done } : t)));\n});\n\nrender();",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Storing objects without stringify (you get `'[object Object]'`).\n- Storing tokens or personal data in localStorage.\n- Updating the DOM directly in handlers so the saved state and the screen drift apart.\n- Not versioning the key, so an old shape breaks a new release."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"localStorage vs sessionStorage vs cookies\" is a standard question; so is a take-home to-do app. Interviewers look for the state → render → events structure and for graceful handling of missing or corrupt storage."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Todo store** implements the state operations and a storage adapter that the UI above would call."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Window.localStorage",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Using the Web Storage API",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/API/Web_Storage_API/Using_the_Web_Storage_API",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "HTML Living Standard: Web storage",
+        "url": "https://html.spec.whatwg.org/multipage/webstorage.html",
+        "publisher": "WHATWG"
+      }
+    ]
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "track": {
+    "slug": "javascript",
+    "technology": "javascript",
+    "level": "beginner",
+    "title": "Modern JavaScript",
+    "description": "From values and scope to the DOM, async code, and your first persistent app. The beginner track for frontend interviews."
+  },
+  "modules": [
+    { "slug": "control-flow", "title": "Control flow", "description": "Make decisions and repeat work with conditionals, loops, and early returns.", "position": 2 },
+    { "slug": "functions", "title": "Functions", "description": "Declare, pass, and return functions with confidence.", "position": 3 },
+    { "slug": "objects", "title": "Objects", "description": "Model data with object literals, methods, destructuring, and safe access.", "position": 4 },
+    { "slug": "arrays", "title": "Arrays", "description": "Transform lists with the array methods interviewers expect you to know cold.", "position": 5 },
+    { "slug": "strings-numbers-json", "title": "Strings, numbers and JSON", "description": "Format text, handle numbers safely, and move data in and out of JSON.", "position": 6 },
+    { "slug": "errors-and-debugging", "title": "Errors and debugging", "description": "Throw, catch, and diagnose problems with the browser tools.", "position": 7 },
+    { "slug": "dom-basics", "title": "DOM basics", "description": "Select, change, create, and listen to elements on a page.", "position": 8 },
+    { "slug": "browser-essentials", "title": "Browser essentials", "description": "Forms, timers, the event loop, and your first network request.", "position": 9 },
+    { "slug": "modules-and-persistence", "title": "Modules and persistence", "description": "Split code into ES modules and keep data between visits.", "position": 10 }
+  ]
+}

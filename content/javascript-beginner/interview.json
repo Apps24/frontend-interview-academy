@@ -1,0 +1,1000 @@
+{
+  "topics": [
+    {
+      "slug": "js-values-and-types",
+      "title": "Values, types & coercion",
+      "description": "Primitives, references, conversion rules, equality, and the number type.",
+      "position": 5
+    },
+    {
+      "slug": "js-functions-and-scope",
+      "title": "Functions, scope & this",
+      "description": "Declarations, closures, hoisting, arrow functions, and how this is decided.",
+      "position": 6
+    },
+    {
+      "slug": "js-objects-and-arrays",
+      "title": "Objects & arrays",
+      "description": "Copying, iteration, array methods, destructuring, and JSON.",
+      "position": 7
+    },
+    {
+      "slug": "js-dom-and-events",
+      "title": "DOM & events",
+      "description": "Selecting and updating elements, event flow, delegation, forms, and security.",
+      "position": 8
+    },
+    {
+      "slug": "js-async-and-browser",
+      "title": "Async & browser APIs",
+      "description": "Event loop, timers, promises, fetch, storage, and modules.",
+      "position": 9
+    }
+  ],
+  "backfill": {
+    "let-const-var": {
+      "experience_level": "junior",
+      "common_mistakes": [
+        "Saying const makes objects immutable",
+        "Forgetting the temporal dead zone for let and const"
+      ]
+    },
+    "javascript-closures": {
+      "experience_level": "junior",
+      "common_mistakes": [
+        "Defining a closure as 'a function inside a function' without mentioning the retained scope",
+        "Claiming closures copy variables rather than keeping live references"
+      ]
+    },
+    "equality-operators": {
+      "experience_level": "junior",
+      "common_mistakes": [
+        "Saying == compares values and === compares types",
+        "Forgetting NaN is not equal to itself with either operator"
+      ]
+    },
+    "javascript-event-loop": {
+      "experience_level": "junior",
+      "common_mistakes": [
+        "Placing promise callbacks in the same queue as setTimeout",
+        "Believing setTimeout(fn, 0) runs immediately"
+      ]
+    },
+    "debounce-vs-throttle": {
+      "experience_level": "junior",
+      "common_mistakes": [
+        "Describing both as 'delaying' without stating the key difference",
+        "Forgetting to pass the latest arguments to the wrapped function"
+      ]
+    },
+    "promise-all-failure": {
+      "experience_level": "mid",
+      "common_mistakes": [
+        "Expecting Promise.all to wait for remaining promises after one rejects",
+        "Not knowing the other promises keep running even though all has rejected"
+      ]
+    }
+  },
+  "questions": [
+    {
+      "slug": "primitive-vs-reference",
+      "topic": "js-values-and-types",
+      "position": 1,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is the difference between primitive and reference values?",
+      "short_answer": "Primitives (string, number, boolean, null, undefined, symbol, bigint) are copied by value: assigning one gives an independent copy. Objects, arrays, and functions are reference values: assigning one shares the same underlying object, so changes through either variable are visible through both.",
+      "detailed_answer": "When a primitive is assigned or passed to a function, the receiving variable gets its own copy, and nothing you do to one affects the other. Primitives are also immutable: string methods return new strings rather than changing the original.\n\nObjects live on the heap and variables hold references to them. `const b = a` copies the reference, not the object, so `b.name = 'x'` changes what `a.name` reads. Passing an object into a function passes that reference, which is why a function can mutate an argument. To get an independent copy you must deliberately clone: spread or Object.assign for a shallow copy, structuredClone for a deep one.\n\nThis also explains why `{} === {}` is false: equality on objects compares references, not contents.",
+      "code_example": "let a = 1;\nlet b = a;\nb++;\nconsole.log(a, b); // 1 2\n\nconst obj = { n: 1 };\nconst alias = obj;\nalias.n = 2;\nconsole.log(obj.n); // 2\n\nconsole.log({ n: 2 } === { n: 2 }); // false",
+      "common_mistakes": [
+        "Saying primitives are 'passed by value' and objects 'by reference' without noting the reference itself is copied (reassigning the parameter does not affect the caller)",
+        "Expecting const to prevent object mutation"
+      ],
+      "follow_ups": [
+        "How would you make a copy of a nested object?",
+        "Why is comparing two arrays with === almost always false?"
+      ]
+    },
+    {
+      "slug": "typeof-null-quirk",
+      "topic": "js-values-and-types",
+      "position": 2,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "Why does typeof null return 'object', and how do you check for null?",
+      "short_answer": "It is a historical bug from the first JavaScript implementation that was kept for backwards compatibility. Check for null with strict equality (value === null), or use value == null to match both null and undefined intentionally.",
+      "detailed_answer": "In the original engine, values carried a type tag, and null was represented by the null pointer, whose tag bits happened to match the object tag. Fixing it would break existing sites, so the language keeps `typeof null === 'object'`.\n\nIn practice, use `=== null` for an exact check, `== null` when you deliberately want to treat null and undefined the same (a common idiom), and `Array.isArray` for arrays, since typeof reports 'object' for those too. typeof is still useful for primitives and functions.",
+      "code_example": "console.log(typeof null);          // 'object'\nconsole.log(null === null);         // true\nconsole.log(undefined == null);     // true\nconsole.log(Array.isArray([]));     // true\nconsole.log(typeof (() => {}));     // 'function'",
+      "common_mistakes": [
+        "Using typeof x === 'object' as a null-safe check and then accessing a property on null",
+        "Believing the quirk was fixed in a later ECMAScript version"
+      ],
+      "follow_ups": [
+        "What are all the possible results of typeof?",
+        "How do you tell an array from a plain object?"
+      ]
+    },
+    {
+      "slug": "truthy-falsy-values",
+      "topic": "js-values-and-types",
+      "position": 3,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "Which values are falsy in JavaScript, and why does it matter?",
+      "short_answer": "Exactly these are falsy: false, 0, -0, 0n, '' (empty string), null, undefined, and NaN. Everything else is truthy, including '0', 'false', empty arrays, and empty objects. It matters because if statements, logical operators, and default patterns like a || b rely on it.",
+      "detailed_answer": "Truthiness is a fixed list, not a judgement about meaning. That is why `if ('false')` runs and `if ([])` runs, while `if (0)` does not.\n\nThe practical consequence is in defaults: `count || 10` replaces a legitimate 0 with 10, which is a real bug in counters and prices. The nullish coalescing operator `??` was added to replace only null and undefined. Guard clauses like `if (!value)` have the same issue, so check the specific condition you mean.",
+      "code_example": "const falsy = [false, 0, -0, 0n, '', null, undefined, NaN];\nconsole.log(falsy.some(Boolean)); // false\n\nconsole.log(Boolean('0'), Boolean([]), Boolean({})); // true true true\n\nconst count = 0;\nconsole.log(count || 10, count ?? 10); // 10 0",
+      "common_mistakes": [
+        "Treating empty arrays or objects as falsy",
+        "Using || for defaults where 0 or '' are valid values"
+      ],
+      "follow_ups": [
+        "What is the difference between || and ???",
+        "How does Boolean(x) differ from !!x?"
+      ]
+    },
+    {
+      "slug": "double-vs-triple-equals-deep",
+      "topic": "js-values-and-types",
+      "position": 4,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "How does loose equality (==) decide whether two values are equal?",
+      "short_answer": "If the types match, == behaves like ===. If not, it converts: null and undefined equal only each other; a number and a string compare after converting the string to a number; booleans are converted to numbers first; an object compared with a primitive is converted with valueOf/toString. Strict equality never converts, which is why it is the default choice.",
+      "detailed_answer": "The abstract equality algorithm is a short list of rules. Same type: compare like ===. `null == undefined` is true and neither equals anything else. Number vs string: convert the string to a number (`'5' == 5`). Boolean vs anything: convert the boolean to a number first, so `true == '1'` is true but `true == 'true'` is false. Object vs primitive: convert the object to a primitive, so `[1] == 1` is true because `[1]` becomes `'1'`.\n\nBecause these rules are easy to misremember, teams standardise on ===. The one idiomatic exception is `x == null` to catch both null and undefined.",
+      "code_example": "console.log('5' == 5, '5' === 5);      // true false\nconsole.log(true == '1', true == 'true'); // true false\nconsole.log([1] == 1, [] == false);    // true true\nconsole.log(null == 0, null == undefined); // false true\nconsole.log(NaN == NaN);               // false",
+      "common_mistakes": [
+        "Explaining == as 'compares values, === compares types too' without the conversion rules",
+        "Not knowing that null == 0 is false"
+      ],
+      "follow_ups": [
+        "When would you deliberately use ==?",
+        "How does Object.is differ from ===?"
+      ]
+    },
+    {
+      "slug": "nan-and-number-isnan",
+      "topic": "js-values-and-types",
+      "position": 5,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is NaN and how do you check for it?",
+      "short_answer": "NaN means 'not a number' and is the result of invalid numeric operations such as Number('abc') or 0 / 0. It is the only value not equal to itself, so use Number.isNaN(value) rather than === NaN. The global isNaN converts its argument first and gives misleading results for strings.",
+      "detailed_answer": "NaN is a number-typed value (typeof NaN is 'number') that represents an undefined numeric result. Any arithmetic involving NaN yields NaN, so it tends to spread through calculations silently.\n\nBecause NaN !== NaN, the reliable check is Number.isNaN, which returns true only for the actual NaN value. The legacy global isNaN coerces first, so isNaN('hello') is true even though the string is not NaN. Object.is(value, NaN) also works. Sources to watch: Number() on bad strings, parseInt on non-numeric text, undefined in arithmetic, and Math functions on out-of-domain input.",
+      "code_example": "const n = Number('abc');\nconsole.log(n === NaN);        // false\nconsole.log(Number.isNaN(n));  // true\nconsole.log(isNaN('hello'));   // true (coerced)\nconsole.log(Number.isNaN('hello')); // false\nconsole.log(typeof NaN);       // 'number'",
+      "common_mistakes": [
+        "Comparing with === NaN",
+        "Using the global isNaN on user input strings"
+      ],
+      "follow_ups": [
+        "What does undefined + 1 evaluate to?",
+        "How does [NaN].includes(NaN) differ from indexOf?"
+      ]
+    },
+    {
+      "slug": "floating-point-money",
+      "topic": "js-values-and-types",
+      "position": 6,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": true,
+      "title": "Why is 0.1 + 0.2 not equal to 0.3, and how should you handle money?",
+      "short_answer": "JavaScript numbers are 64-bit binary floats, and 0.1 and 0.2 cannot be represented exactly, so the sum is 0.30000000000000004. For money, store integer minor units (paise or cents), do arithmetic on integers, and format only for display; compare floats with a tolerance if you must.",
+      "detailed_answer": "IEEE 754 doubles represent values in base 2. Just as 1/3 is a repeating decimal, 0.1 is a repeating binary fraction, so it is stored as the nearest representable value. Small errors accumulate through arithmetic, and === comparisons fail.\n\nStrategies: keep money as integers in the smallest unit and only divide by 100 when formatting; use toFixed for display rounding; compare with Math.abs(a - b) < Number.EPSILON for tiny differences; use BigInt for huge integers beyond 2^53; use a decimal library for financial calculations that need exact decimal semantics. Also be aware that toFixed itself rounds the binary value, so (1.005).toFixed(2) gives '1.00'.",
+      "code_example": "console.log(0.1 + 0.2);            // 0.30000000000000004\nconsole.log(0.1 + 0.2 === 0.3);    // false\nconsole.log(Math.abs(0.1 + 0.2 - 0.3) < Number.EPSILON); // true\n\nconst paise = 1999 + 2001;         // integers\nconsole.log((paise / 100).toFixed(2)); // '40.00'",
+      "common_mistakes": [
+        "Saying this is a JavaScript bug rather than a property of binary floating point",
+        "Rounding in the middle of a calculation instead of at the display step"
+      ],
+      "follow_ups": [
+        "What is Number.MAX_SAFE_INTEGER?",
+        "When would you reach for BigInt?"
+      ]
+    },
+    {
+      "slug": "string-immutability",
+      "topic": "js-values-and-types",
+      "position": 7,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "Are strings mutable in JavaScript?",
+      "short_answer": "No. Strings are immutable primitives: every method such as toUpperCase, slice, or replace returns a new string and leaves the original untouched, and assigning to an index like s[0] = 'x' silently does nothing.",
+      "detailed_answer": "Immutability means you must capture the result of a string operation: `name = name.trim()`. It also means strings are safe to share and compare by value with ===.\n\nBuilding long strings in a loop with += creates many intermediate strings; engines optimise this well, but collecting parts in an array and calling join is a clear pattern for large outputs. Template literals are the readable way to compose strings from values.",
+      "code_example": "const s = 'hello';\ns.toUpperCase();\ns[0] = 'J';\nconsole.log(s);                 // 'hello'\n\nconst shout = s.toUpperCase();\nconsole.log(shout);             // 'HELLO'\nconsole.log(['a', 'b'].join('-')); // 'a-b'",
+      "common_mistakes": [
+        "Calling a method and expecting the variable to change",
+        "Assuming index assignment throws (it fails silently outside strict-mode checks)"
+      ],
+      "follow_ups": [
+        "How would you reverse a string?",
+        "What does string length count for emoji?"
+      ]
+    },
+    {
+      "slug": "implicit-conversion-plus",
+      "topic": "js-values-and-types",
+      "position": 8,
+      "difficulty": 2,
+      "experience_level": "mid",
+      "is_premium": true,
+      "title": "How does the + operator decide between addition and concatenation?",
+      "short_answer": "The + operator first converts both operands to primitives. If either result is a string, it concatenates; otherwise it converts both to numbers and adds. Every other arithmetic operator (-, *, /) always converts to numbers. That is why 1 + '2' is '12' but '3' - 1 is 2.",
+      "detailed_answer": "The rule is asymmetric on purpose: + is overloaded for strings and numbers, the others are not. Objects are converted via Symbol.toPrimitive, valueOf, or toString, so [] + {} becomes '' + '[object Object]'. Evaluation is left to right, so 1 + 2 + '3' is '33' while '1' + 2 + 3 is '123'.\n\nThe practical advice: convert explicitly at boundaries (Number(input), String(value)) so readers never have to run the algorithm in their heads, and never rely on + to coerce user input.",
+      "code_example": "console.log(1 + '2', '3' - 1);      // '12' 2\nconsole.log(1 + 2 + '3');           // '33'\nconsole.log('1' + 2 + 3);           // '123'\nconsole.log([] + {});               // '[object Object]'\nconsole.log(true + true);           // 2\nconsole.log(+'42' + 1);             // 43 (unary + converts)",
+      "common_mistakes": [
+        "Saying + 'prefers strings' without the ToPrimitive step",
+        "Getting 1 + 2 + '3' wrong by ignoring left-to-right evaluation"
+      ],
+      "follow_ups": [
+        "What does {} + [] print at the console, and why is it different?",
+        "How would you safely sum values from form inputs?"
+      ]
+    },
+    {
+      "slug": "undefined-vs-null",
+      "topic": "js-values-and-types",
+      "position": 9,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is the difference between undefined and null?",
+      "short_answer": "undefined means a value has not been assigned: a declared but unset variable, a missing property, a missing argument, or a function without a return. null is an explicit, intentional 'no value' that a developer assigns. They are loosely equal to each other but strictly different, and typeof gives 'undefined' and 'object' respectively.",
+      "detailed_answer": "The engine produces undefined; developers produce null. That convention lets you distinguish 'never set' from 'deliberately empty', for example a form field the user cleared versus one they never touched. JSON.stringify drops undefined properties but keeps null, which matters for APIs.\n\nDefault parameters and destructuring defaults trigger only for undefined, not null. The idiom value == null tests for both when you do not care which one it is.",
+      "code_example": "let a;\nconst obj = {};\nfunction f() {}\nconsole.log(a, obj.missing, f()); // undefined undefined undefined\n\nconst selected = null;             // intentional\nconsole.log(selected == undefined, selected === undefined); // true false\nconsole.log(JSON.stringify({ a: undefined, b: null }));     // '{\"b\":null}'",
+      "common_mistakes": [
+        "Using them interchangeably in one codebase",
+        "Expecting default parameters to apply for null"
+      ],
+      "follow_ups": [
+        "What does void 0 evaluate to?",
+        "How does optional chaining treat null versus undefined?"
+      ]
+    },
+    {
+      "slug": "function-declaration-vs-expression",
+      "topic": "js-functions-and-scope",
+      "position": 1,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is the difference between a function declaration and a function expression?",
+      "short_answer": "A declaration (function name() {}) is hoisted with its body, so it can be called before the line it appears on. A function expression assigns a function to a variable, so it is only usable after that line runs. Expressions are values you can pass around; arrow functions are a concise expression form.",
+      "detailed_answer": "Hoisting is the key behavioural difference: declarations are created during the setup of their scope, so top-level helpers can live at the bottom of a file. A const or let holding a function expression is in the temporal dead zone until its line executes, and a var would be undefined until then, so calling it early throws.\n\nExpressions can be anonymous or named; a named function expression can refer to itself for recursion and shows a useful name in stack traces. Choose declarations for standalone helpers and expressions when the function is being stored, passed, or returned.",
+      "code_example": "console.log(square(3)); // 9\nfunction square(n) { return n * n; }\n\ntry {\n  cube(3);\n} catch (e) {\n  console.log(e.name); // ReferenceError\n}\nconst cube = (n) => n ** 3;",
+      "common_mistakes": [
+        "Claiming function expressions are 'not hoisted' without explaining the variable is hoisted but uninitialised",
+        "Assuming arrow functions are declarations"
+      ],
+      "follow_ups": [
+        "What is the temporal dead zone?",
+        "When is a named function expression useful?"
+      ]
+    },
+    {
+      "slug": "arrow-function-differences",
+      "topic": "js-functions-and-scope",
+      "position": 2,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "How do arrow functions differ from regular functions?",
+      "short_answer": "Arrow functions have no this, arguments, or super of their own; they use the enclosing scope's. They cannot be used as constructors with new, have no prototype property, and support an implicit return for a single expression body. They are ideal for callbacks and wrong for object methods that rely on this.",
+      "detailed_answer": "Lexical this is the headline feature: inside a method, an arrow callback keeps the method's this, which removed the need for `const self = this` or bind in most code. The flip side is that an arrow used as a method sees the outer this (undefined in modules), and an arrow cannot be rebound with call, apply, or bind.\n\nSyntactically, a block body needs an explicit return, and returning an object literal requires parentheses. They also cannot be generators.",
+      "code_example": "const timer = {\n  seconds: 0,\n  start() {\n    setInterval(() => { this.seconds++; }, 1000); // this is timer\n  },\n  bad: () => this, // not timer\n};\n\nconst make = () => ({ id: 1 }); // parentheses for an object\nfunction Regular() {}\nnew Regular();\n// new (() => {}) would throw a TypeError",
+      "common_mistakes": [
+        "Saying arrows are 'just shorter syntax'",
+        "Using an arrow for a method or an event handler that needs this to be the element"
+      ],
+      "follow_ups": [
+        "Can you bind an arrow function?",
+        "Why do arrows have no arguments object and what replaces it?"
+      ]
+    },
+    {
+      "slug": "how-this-is-determined",
+      "topic": "js-functions-and-scope",
+      "position": 3,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "How is the value of this determined?",
+      "short_answer": "For regular functions, this is set by the call: obj.method() makes this obj; a plain call gives undefined in strict mode; call/apply/bind set it explicitly; new sets it to the new instance. Arrow functions ignore all of that and use the this of the surrounding scope where they were created.",
+      "detailed_answer": "Think in terms of four binding rules in priority order: new binding, explicit binding (call/apply/bind), implicit binding (called as a property of an object), and default binding (undefined in strict mode, the global object in sloppy mode). Arrow functions are the exception: lexical this, decided at definition time.\n\nThe common bug is losing implicit binding by detaching a method, for example passing obj.handler as a callback. Fix with bind, an arrow wrapper, or class fields defined as arrows. Event listeners set this to currentTarget for regular functions, which is another place arrows change behaviour.",
+      "code_example": "const user = {\n  name: 'Ira',\n  hello() { return this?.name; },\n};\nconst detached = user.hello;\nconsole.log(user.hello(), detached());         // 'Ira' undefined\nconsole.log(detached.call({ name: 'Bo' }));    // 'Bo'\nconst bound = user.hello.bind(user);\nconsole.log(bound.call({ name: 'X' }));         // 'Ira' (bind wins)",
+      "common_mistakes": [
+        "Saying this refers to 'the function itself' or 'where it is defined'",
+        "Not knowing that bind cannot be overridden by call"
+      ],
+      "follow_ups": [
+        "What is this inside a class method passed to setTimeout?",
+        "What does this refer to at the top level of a module?"
+      ]
+    },
+    {
+      "slug": "hoisting-explained",
+      "topic": "js-functions-and-scope",
+      "position": 4,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is hoisting?",
+      "short_answer": "Hoisting describes how declarations are processed before code runs: function declarations are available in full from the start of their scope; var variables exist from the start but are undefined until assigned; let, const, and class also exist from the start but throw if accessed before their line (the temporal dead zone).",
+      "detailed_answer": "Nothing physically moves; the engine registers bindings when it enters a scope. The differences are in initialisation: functions are initialised with their body, var with undefined, and let/const are left uninitialised so an early access is a ReferenceError rather than a silent undefined.\n\nThis is why modern code prefers const and let: the error surfaces bugs immediately. Function expressions follow their variable's rule, not the function rule.",
+      "code_example": "console.log(a);   // undefined\nvar a = 1;\n\ntry {\n  console.log(b); // ReferenceError\n} catch (e) { console.log(e.name); }\nlet b = 2;\n\nconsole.log(c()); // 'ok'\nfunction c() { return 'ok'; }",
+      "common_mistakes": [
+        "Saying let and const are not hoisted",
+        "Describing hoisting as code being moved to the top"
+      ],
+      "follow_ups": [
+        "Why does the TDZ exist?",
+        "Is a class declaration hoisted?"
+      ]
+    },
+    {
+      "slug": "closures-practical-uses",
+      "topic": "js-functions-and-scope",
+      "position": 5,
+      "difficulty": 2,
+      "experience_level": "mid",
+      "is_premium": true,
+      "title": "Give practical uses of closures.",
+      "short_answer": "Closures keep state private and alive: counters and factories (makeCounter), memoisation caches, debounce and throttle timers, module-style encapsulation, partial application, and callbacks that remember request context. Any time a function needs to remember something between calls without a global, a closure is the tool.",
+      "detailed_answer": "A closure is a function plus the variables it can see from where it was created. Because those variables live as long as the function does, you get persistent private state without classes.\n\nConcrete patterns: a factory returning an object whose methods share a hidden variable; debounce holding a timer id across calls; a once() wrapper remembering whether it has run; memoize keeping a Map of results; event handlers that capture the loop item they were created for. The trade-off is memory: a closure keeps its scope alive, so large data captured by long-lived callbacks can leak.",
+      "code_example": "function once(fn) {\n  let done = false;\n  let result;\n  return (...args) => {\n    if (!done) {\n      done = true;\n      result = fn(...args);\n    }\n    return result;\n  };\n}\n\nconst init = once(() => { console.log('init'); return 42; });\ninit(); init(); // logs once\n\nfunction memoize(fn) {\n  const cache = new Map();\n  return (n) => cache.has(n) ? cache.get(n) : (cache.set(n, fn(n)), cache.get(n));\n}",
+      "common_mistakes": [
+        "Only giving the textbook counter example",
+        "Not mentioning memory retention as a cost"
+      ],
+      "follow_ups": [
+        "How does a closure interact with a for loop using var?",
+        "How would you implement throttle?"
+      ]
+    },
+    {
+      "slug": "call-apply-bind",
+      "topic": "js-functions-and-scope",
+      "position": 6,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What do call, apply, and bind do?",
+      "short_answer": "All three set this explicitly. call invokes immediately with arguments listed one by one; apply invokes immediately with arguments in an array; bind returns a new function permanently bound to the given this (and optionally preset arguments) without calling it.",
+      "detailed_answer": "call and apply differ only in how arguments are passed; with spread syntax available, call(obj, ...arr) has mostly replaced apply. bind is for later: attaching a method as a callback or event handler while keeping its object, or partially applying leading arguments.\n\nA bound function ignores subsequent call/apply this values, and binding an arrow function has no effect on this. Class field arrows (`handle = () => {}`) are the modern alternative to binding methods in constructors.",
+      "code_example": "function intro(greeting, punct) {\n  return `${greeting}, ${this.name}${punct}`;\n}\nconst p = { name: 'Asha' };\nconsole.log(intro.call(p, 'Hi', '!'));      // 'Hi, Asha!'\nconsole.log(intro.apply(p, ['Hey', '?'])); // 'Hey, Asha?'\nconst hiAsha = intro.bind(p, 'Hi');\nconsole.log(hiAsha('.'));                   // 'Hi, Asha.'",
+      "common_mistakes": [
+        "Mixing up which one takes an array",
+        "Expecting bind to call the function"
+      ],
+      "follow_ups": [
+        "How would you implement bind yourself?",
+        "Why does Math.max.apply(null, arr) work?"
+      ]
+    },
+    {
+      "slug": "default-rest-spread-differences",
+      "topic": "js-functions-and-scope",
+      "position": 7,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is the difference between rest parameters and spread syntax?",
+      "short_answer": "Both use three dots but in opposite directions. A rest parameter in a function signature or destructuring pattern collects remaining values into an array or object. Spread in a call, array literal, or object literal expands an iterable or object into individual elements or properties.",
+      "detailed_answer": "Rest must be the last parameter and produces a real array, replacing the old arguments object. In destructuring, rest gathers what the pattern did not name.\n\nSpread copies: `[...a, ...b]` concatenates, `{ ...defaults, ...overrides }` merges with later keys winning, and `f(...args)` passes elements as separate arguments. The copies are shallow; nested objects remain shared.",
+      "code_example": "function sum(first, ...rest) {\n  return rest.reduce((a, b) => a + b, first);\n}\nconst nums = [1, 2, 3];\nconsole.log(sum(...nums));            // 6\n\nconst { a, ...others } = { a: 1, b: 2, c: 3 };\nconsole.log(others);                  // { b: 2, c: 3 }\nconsole.log({ x: 1, ...{ x: 2, y: 3 } }); // { x: 2, y: 3 }",
+      "common_mistakes": [
+        "Calling them the same feature",
+        "Assuming spread deep-copies"
+      ],
+      "follow_ups": [
+        "What happens if rest is not the last parameter?",
+        "How would you deep-clone an object?"
+      ]
+    },
+    {
+      "slug": "iife-and-module-pattern",
+      "topic": "js-functions-and-scope",
+      "position": 8,
+      "difficulty": 2,
+      "experience_level": "mid",
+      "is_premium": true,
+      "title": "What is an IIFE and why was it used?",
+      "short_answer": "An Immediately Invoked Function Expression is a function defined and called in one expression: (function () { … })(). Before ES modules and block scoping, it created a private scope so variables did not leak into the global object and libraries could expose only a chosen API (the module pattern). Today ES modules and let/const cover most of those needs.",
+      "detailed_answer": "Wrapping code in a function creates a scope; invoking it immediately runs the code once. Returning an object from the IIFE gives the classic module pattern: private variables in the closure, public methods on the returned object.\n\nModern replacements: ES modules give file-level privacy and single evaluation; block scope with let and const solves the loop-variable problem that IIFEs were once used for. You still see IIFEs for top-level await in non-module scripts (an async IIFE) and in bundler output.",
+      "code_example": "const counter = (function () {\n  let count = 0; // private\n  return {\n    increment: () => ++count,\n    value: () => count,\n  };\n})();\ncounter.increment();\nconsole.log(counter.value()); // 1\n\n(async () => {\n  await Promise.resolve();\n})();",
+      "common_mistakes": [
+        "Not knowing why the wrapping parentheses are needed",
+        "Presenting IIFEs as the current best practice for modules"
+      ],
+      "follow_ups": [
+        "How do ES modules provide privacy?",
+        "What is the difference between an IIFE and a block?"
+      ]
+    },
+    {
+      "slug": "pure-functions-and-side-effects",
+      "topic": "js-functions-and-scope",
+      "position": 9,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is a pure function, and why do frontend frameworks care?",
+      "short_answer": "A pure function returns the same output for the same inputs and has no side effects: it does not mutate its arguments, touch the DOM, read the clock, or make requests. Frameworks care because pure render and reducer functions are predictable, easy to test, and safe to re-run, memoise, or run concurrently.",
+      "detailed_answer": "Purity is about referential transparency. Side effects are not bad, they are the point of an application, but isolating them (in event handlers, effects, or services) keeps the core logic testable. Array methods like map and filter encourage purity; sort and splice break it by mutating.\n\nIn React, components and reducers are expected to be pure so the framework can re-render freely; Angular's OnPush change detection and pipes assume inputs determine outputs. In interviews, calling out mutation of an input array as an impurity is a strong signal.",
+      "code_example": "// impure: mutates input and depends on Date\nfunction stamp(items) {\n  items.push(Date.now());\n  return items;\n}\n\n// pure: new array, clock injected\nfunction stampPure(items, now) {\n  return [...items, now];\n}",
+      "common_mistakes": [
+        "Calling any function without a return value 'impure' but missing argument mutation",
+        "Claiming pure functions cannot use loops or local variables"
+      ],
+      "follow_ups": [
+        "How does immutability help change detection?",
+        "Which built-in array methods mutate?"
+      ]
+    },
+    {
+      "slug": "shallow-vs-deep-copy",
+      "topic": "js-objects-and-arrays",
+      "position": 1,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is the difference between a shallow copy and a deep copy?",
+      "short_answer": "A shallow copy creates a new top-level object or array but keeps the same references for nested values, so nested changes are shared. A deep copy recursively copies everything. Spread, Object.assign, slice, and Array.from are shallow; structuredClone is the built-in deep copy.",
+      "detailed_answer": "Most bugs come from assuming spread is deep: `const next = { ...state }` then `next.user.name = 'x'` changes the original state's user too. For nested updates, copy each level you change (`{ ...state, user: { ...state.user, name: 'x' } }`) or use structuredClone.\n\nJSON.parse(JSON.stringify(obj)) is a common deep-copy trick but drops undefined, functions, and turns Dates into strings. structuredClone handles Dates, Maps, Sets, and nested structures but not functions or DOM nodes.",
+      "code_example": "const state = { user: { name: 'A' }, tags: ['x'] };\nconst shallow = { ...state };\nshallow.user.name = 'B';\nconsole.log(state.user.name); // 'B' (shared)\n\nconst deep = structuredClone(state);\ndeep.tags.push('y');\nconsole.log(state.tags.length); // 1",
+      "common_mistakes": [
+        "Using JSON round-trips without knowing what they lose",
+        "Expecting Object.freeze to be deep"
+      ],
+      "follow_ups": [
+        "How would you update a deeply nested property immutably?",
+        "What can structuredClone not copy?"
+      ]
+    },
+    {
+      "slug": "mutating-vs-non-mutating-array-methods",
+      "topic": "js-objects-and-arrays",
+      "position": 2,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "Which array methods mutate the array, and why does it matter?",
+      "short_answer": "Mutating: push, pop, shift, unshift, splice, sort, reverse, fill, copyWithin. Non-mutating: map, filter, reduce, slice, concat, flat, and the newer toSorted, toReversed, toSpliced, with. It matters because arrays are shared by reference; mutating one a caller still uses causes bugs, and frameworks detect changes by reference.",
+      "detailed_answer": "The rule of thumb: methods that change length or order in place mutate. sort is the surprising one, because people expect it to return a sorted copy; it sorts in place and returns the same array. The ES2023 toX methods give copying equivalents.\n\nIn UI code, immutable updates let you compare `prev === next` to know whether anything changed, which React's state and memoisation rely on. Mutating state in place is a classic reason a component does not re-render.",
+      "code_example": "const a = [3, 1, 2];\nconst b = a.sort();\nconsole.log(a === b, a);         // true [1, 2, 3]\n\nconst c = [3, 1, 2];\nconst d = c.toSorted();\nconsole.log(c === d, c, d);      // false [3, 1, 2] [1, 2, 3]",
+      "common_mistakes": [
+        "Listing map as mutating",
+        "Forgetting that sort and reverse mutate"
+      ],
+      "follow_ups": [
+        "How would you remove an item without splice?",
+        "Why might a component not re-render after array.push?"
+      ]
+    },
+    {
+      "slug": "map-filter-reduce-when",
+      "topic": "js-objects-and-arrays",
+      "position": 3,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "When would you use map, filter, and reduce?",
+      "short_answer": "map transforms each item into a new array of the same length. filter keeps the items that pass a test. reduce folds the array into a single value of any shape, such as a sum, an object tally, or a grouped structure. Use forEach or a loop when you only need side effects.",
+      "detailed_answer": "Choose by the shape of the result. Same length, different items: map. Fewer items, same shape: filter. One value or a different shape: reduce, always with an initial value. Chains read well for small pipelines; for very large arrays a single loop can avoid intermediate arrays.\n\nAvoid map for side effects (the returned array is wasted), avoid reduce for things map or filter say more clearly, and reach for find, some, and every for searches instead of filter()[0] or filter().length.",
+      "code_example": "const orders = [\n  { id: 1, total: 40, paid: true },\n  { id: 2, total: 60, paid: false },\n];\nconst ids = orders.map((o) => o.id);                 // [1, 2]\nconst paid = orders.filter((o) => o.paid);            // [{ id: 1, ... }]\nconst revenue = paid.reduce((s, o) => s + o.total, 0); // 40\nconst byId = orders.reduce((acc, o) => ({ ...acc, [o.id]: o }), {});",
+      "common_mistakes": [
+        "Omitting reduce's initial value",
+        "Using map when the result is discarded"
+      ],
+      "follow_ups": [
+        "Implement map using reduce.",
+        "How would you group an array of objects by a key?"
+      ]
+    },
+    {
+      "slug": "check-property-exists",
+      "topic": "js-objects-and-arrays",
+      "position": 4,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "How do you check whether an object has a property?",
+      "short_answer": "Use the in operator to check own or inherited properties, Object.hasOwn(obj, key) (or hasOwnProperty) for own properties only, and obj.key !== undefined only when you know the property can never legitimately be undefined. Optional chaining reads a possibly missing path safely but does not distinguish missing from undefined.",
+      "detailed_answer": "The distinction matters because reading a missing property and reading a property set to undefined both give undefined. `'key' in obj` answers 'does this key exist anywhere in the chain', which includes toString on any plain object. Object.hasOwn restricts to the object itself and is safer than obj.hasOwnProperty, which fails on objects created with Object.create(null).\n\nFor maps of arbitrary user-provided keys, prefer a Map, which has has() and no inherited keys to collide with.",
+      "code_example": "const o = { a: undefined };\nconsole.log('a' in o, o.a === undefined);          // true true\nconsole.log('b' in o, o.b === undefined);          // false true\nconsole.log('toString' in o, Object.hasOwn(o, 'toString')); // true false\n\nconst m = new Map([['toString', 1]]);\nconsole.log(m.has('toString'));                    // true",
+      "common_mistakes": [
+        "Using obj.key to test existence",
+        "Forgetting inherited keys with in"
+      ],
+      "follow_ups": [
+        "When would you use a Map instead of an object?",
+        "What does Object.keys return for inherited properties?"
+      ]
+    },
+    {
+      "slug": "destructuring-use-cases",
+      "topic": "js-objects-and-arrays",
+      "position": 5,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is destructuring and where is it most useful?",
+      "short_answer": "Destructuring unpacks values from arrays (by position) and objects (by key) into variables in one statement, with support for renaming, defaults, nesting, and rest. It is most useful in function parameters for options objects, in React props and hooks, in swapping variables, and in loops over Object.entries.",
+      "detailed_answer": "Object patterns match keys and can rename (`{ id: userId }`) and default (`{ role = 'viewer' }`); array patterns match positions and can skip (`[, second]`). Parameter destructuring with a trailing `= {}` makes a function safe to call without arguments.\n\nWatch for two traps: destructuring from undefined or null throws, and defaults apply only for undefined. Deeply nested patterns can hurt readability; two shallow statements are often clearer.",
+      "code_example": "function connect({ host = 'localhost', port = 5432 } = {}) {\n  return `${host}:${port}`;\n}\nconsole.log(connect());                       // 'localhost:5432'\n\nlet a = 1, b = 2;\n[a, b] = [b, a];\nfor (const [key, value] of Object.entries({ x: 1 })) {\n  console.log(key, value);\n}",
+      "common_mistakes": [
+        "Reversing the rename syntax",
+        "Forgetting the = {} on an options parameter"
+      ],
+      "follow_ups": [
+        "How do you destructure a value that might be null?",
+        "What does a rest element in an object pattern collect?"
+      ]
+    },
+    {
+      "slug": "json-stringify-gotchas",
+      "topic": "js-objects-and-arrays",
+      "position": 6,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": true,
+      "title": "What are the gotchas of JSON.stringify and JSON.parse?",
+      "short_answer": "stringify omits undefined, functions, and symbols in objects (null in arrays), turns NaN and Infinity into null, serialises Dates as ISO strings, turns Maps and Sets into {}, and throws on circular references or BigInt. parse returns those dates as strings and throws SyntaxError on bad input, so wrap it in try/catch for untrusted text.",
+      "detailed_answer": "Use the replacer (array or function) to whitelist or transform, the space argument for pretty printing, and a toJSON method on your own classes to control output. Use a reviver in parse to rebuild Dates or class instances.\n\nBecause of these rules, JSON round-tripping is not a general deep clone; structuredClone is. For circular data, either break the cycle in a replacer or use a library.",
+      "code_example": "const text = JSON.stringify({ a: undefined, d: new Date(0), s: new Set([1]), n: NaN, arr: [undefined] });\nconsole.log(text);\n// {\"d\":\"1970-01-01T00:00:00.000Z\",\"s\":{},\"n\":null,\"arr\":[null]}\n\nconst back = JSON.parse(text, (k, v) => (k === 'd' ? new Date(v) : v));\nconsole.log(back.d instanceof Date); // true",
+      "common_mistakes": [
+        "Using JSON for deep cloning objects with dates",
+        "Forgetting parse can throw"
+      ],
+      "follow_ups": [
+        "How would you serialise a Map?",
+        "What does toJSON do?"
+      ]
+    },
+    {
+      "slug": "map-vs-object",
+      "topic": "js-objects-and-arrays",
+      "position": 7,
+      "difficulty": 2,
+      "experience_level": "mid",
+      "is_premium": true,
+      "title": "When should you use a Map instead of a plain object?",
+      "short_answer": "Use a Map when keys are not strings (objects, numbers kept as numbers), when keys are user-provided and could collide with inherited names like constructor, when you add and remove entries frequently, or when you need reliable insertion order and a size property. Use a plain object for fixed, known, string-keyed records and JSON.",
+      "detailed_answer": "Maps keep any value as a key with SameValueZero comparison, expose size, iterate in insertion order, and have no prototype keys to trip over. Objects are lighter for static shapes, work directly with JSON, and support destructuring and spread.\n\nSets are the same idea for unique values; WeakMap and WeakSet hold object keys weakly, which is useful for attaching metadata to DOM nodes without leaking memory.",
+      "code_example": "const counts = new Map();\nfor (const word of ['a', 'b', 'a', 'constructor']) {\n  counts.set(word, (counts.get(word) ?? 0) + 1);\n}\nconsole.log(counts.get('a'), counts.size);      // 2 3\n\nconst el = {};\nconst meta = new WeakMap();\nmeta.set(el, { visits: 1 });",
+      "common_mistakes": [
+        "Saying Maps are always faster",
+        "Forgetting Maps do not serialise to JSON directly"
+      ],
+      "follow_ups": [
+        "How do you convert a Map to JSON?",
+        "What problem does WeakMap solve?"
+      ]
+    },
+    {
+      "slug": "sort-comparator-pitfalls",
+      "topic": "js-objects-and-arrays",
+      "position": 8,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "Why does [10, 9, 1].sort() give [1, 10, 9], and how do you sort correctly?",
+      "short_answer": "Without a comparator, sort converts elements to strings and compares them by UTF-16 code units, so '10' comes before '9'. Pass a comparator: (a, b) => a - b for numbers, a.localeCompare(b) for strings, and chain comparisons with || for multiple keys. sort mutates; use toSorted for a copy. Sorting is stable, so equal items keep their order.",
+      "detailed_answer": "A comparator returns a negative number to place a before b, positive to place b first, and zero to keep order. Returning booleans is a common bug because false and true become 0 and 1, which never says 'b first'.\n\nFor objects sort by a derived key: b.score - a.score for descending. For dates, subtract getTime values. For case-insensitive text, localeCompare with { sensitivity: 'base' }.",
+      "code_example": "console.log([10, 9, 1].sort());                    // [1, 10, 9]\nconsole.log([10, 9, 1].sort((a, b) => a - b));     // [1, 9, 10]\n\nconst people = [{ n: 'bo', s: 5 }, { n: 'Al', s: 5 }, { n: 'Cy', s: 9 }];\nconst ranked = people.toSorted((a, b) => b.s - a.s || a.n.localeCompare(b.n, undefined, { sensitivity: 'base' }));\nconsole.log(ranked.map((p) => p.n));               // ['Cy', 'Al', 'bo']",
+      "common_mistakes": [
+        "Returning a boolean from the comparator",
+        "Forgetting sort mutates the original"
+      ],
+      "follow_ups": [
+        "What does 'stable sort' guarantee?",
+        "How would you sort by two keys?"
+      ]
+    },
+    {
+      "slug": "array-like-and-iterables",
+      "topic": "js-objects-and-arrays",
+      "position": 9,
+      "difficulty": 2,
+      "experience_level": "mid",
+      "is_premium": true,
+      "title": "What is the difference between an array, an array-like object, and an iterable?",
+      "short_answer": "An array is an Array instance with the full method set. An array-like has indexed elements and a length but no array methods (arguments, NodeList from some APIs, HTMLCollection). An iterable implements Symbol.iterator so for...of and spread work (arrays, strings, Maps, Sets, NodeList). Array.from converts either kind into a real array.",
+      "detailed_answer": "The DOM is where this bites: querySelectorAll returns a NodeList that is iterable and has forEach, but getElementsByClassName returns a live HTMLCollection with no forEach. Spread or Array.from give you map and filter on either.\n\nGenerators create iterables lazily, and any object can become iterable by defining [Symbol.iterator]. Iterables can be infinite, so spread them only when they are finite.",
+      "code_example": "function f() {\n  console.log(Array.isArray(arguments));       // false\n  return Array.from(arguments).map((x) => x * 2);\n}\nconsole.log(f(1, 2));                          // [2, 4]\n\nconst set = new Set([1, 1, 2]);\nconsole.log([...set]);                         // [1, 2]\nconst iterable = { *[Symbol.iterator]() { yield 'a'; yield 'b'; } };\nconsole.log([...iterable]);                    // ['a', 'b']",
+      "common_mistakes": [
+        "Calling map directly on an HTMLCollection",
+        "Assuming every array-like is iterable"
+      ],
+      "follow_ups": [
+        "How would you make a class iterable?",
+        "What is the difference between a NodeList and an HTMLCollection?"
+      ]
+    },
+    {
+      "slug": "innerhtml-vs-textcontent",
+      "topic": "js-dom-and-events",
+      "position": 1,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is the difference between innerHTML and textContent?",
+      "short_answer": "textContent sets or reads plain text; whatever you assign is shown literally. innerHTML parses the string as HTML and creates elements, so any user-controlled string assigned to it can inject markup and scripts (XSS). Use textContent for text, and build elements with createElement when you need structure.",
+      "detailed_answer": "innerHTML is convenient for static templates you author yourself, but the moment a value comes from a user, a URL, or an API, it must be treated as text. Even without <script> tags, attributes like onerror on an <img> execute code.\n\ntextContent also reads all text including hidden elements, whereas innerText is layout-aware and slower. For rendering data, the safe pattern is createElement + textContent, or a framework that escapes by default. If you must render HTML from users, sanitise it with a well-maintained library.",
+      "code_example": "const untrusted = '<img src=x onerror=\"alert(1)\">';\nconst out = document.querySelector('#out');\n\nout.textContent = untrusted; // shows the literal string, nothing runs\n// out.innerHTML = untrusted; // executes the onerror handler",
+      "common_mistakes": [
+        "Saying innerHTML is merely 'slower'",
+        "Believing escaping < and > by hand is enough"
+      ],
+      "follow_ups": [
+        "What is XSS?",
+        "How does a framework like React prevent injection by default?"
+      ]
+    },
+    {
+      "slug": "event-bubbling-and-capturing",
+      "topic": "js-dom-and-events",
+      "position": 2,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "Explain event bubbling and capturing.",
+      "short_answer": "When an event fires, it travels in three phases: capturing from window down to the target's parent, the target phase, then bubbling from the target back up to window. Listeners run in the bubbling phase by default; pass { capture: true } to run during capture. stopPropagation halts the journey; some events such as focus do not bubble.",
+      "detailed_answer": "Bubbling is what makes event delegation work: one listener on a parent sees events from all descendants. event.target is the origin, event.currentTarget is the element whose listener is running, and event.eventPhase tells you the phase.\n\nstopPropagation should be rare because it silently breaks other delegated handlers and analytics. stopImmediatePropagation also blocks remaining listeners on the same element. preventDefault is unrelated: it cancels the browser's default action, not propagation.",
+      "code_example": "document.querySelector('#outer').addEventListener('click', () => console.log('outer bubble'));\ndocument.querySelector('#outer').addEventListener('click', () => console.log('outer capture'), { capture: true });\ndocument.querySelector('#inner').addEventListener('click', () => console.log('inner'));\n// Clicking #inner logs: outer capture, inner, outer bubble",
+      "common_mistakes": [
+        "Confusing preventDefault with stopPropagation",
+        "Not knowing focus and blur do not bubble (focusin/focusout do)"
+      ],
+      "follow_ups": [
+        "What is event delegation?",
+        "Which events do not bubble?"
+      ]
+    },
+    {
+      "slug": "event-delegation-explained",
+      "topic": "js-dom-and-events",
+      "position": 3,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is event delegation and when would you use it?",
+      "short_answer": "Event delegation attaches one listener to a common ancestor and uses event.target (usually with closest) to work out which descendant was involved. Use it for lists, tables, and any content added dynamically: it handles future elements automatically and avoids thousands of listeners.",
+      "detailed_answer": "The pattern: listen on the container, call event.target.closest('[data-action]') to find the meaningful element, ignore the event if nothing matches or the match is outside the container, then act based on data attributes. It relies on bubbling, so it does not work for non-bubbling events like focus (use focusin).\n\nTrade-offs: handlers must tolerate clicks on padding or nested elements, and stopPropagation elsewhere can prevent the event from reaching the container.",
+      "code_example": "list.addEventListener('click', (event) => {\n  const button = event.target.closest('button[data-action]');\n  if (!button || !list.contains(button)) return;\n  const row = button.closest('li');\n  if (button.dataset.action === 'remove') row.remove();\n});",
+      "common_mistakes": [
+        "Comparing event.target === element instead of using closest",
+        "Forgetting non-bubbling events"
+      ],
+      "follow_ups": [
+        "How would you delegate keyboard events?",
+        "What does closest do that parentElement does not?"
+      ]
+    },
+    {
+      "slug": "target-vs-currenttarget",
+      "topic": "js-dom-and-events",
+      "position": 4,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is the difference between event.target and event.currentTarget?",
+      "short_answer": "target is the element where the event originated, the innermost element clicked. currentTarget is the element whose listener is currently running, which changes as the event bubbles. In a regular-function handler, this equals currentTarget; in an arrow handler it does not.",
+      "detailed_answer": "For a listener on a button containing an icon, clicking the icon gives target = the icon and currentTarget = the button. Use currentTarget when you want the element you attached to, and target with closest when delegating.\n\nBecause arrow handlers have lexical this, prefer reading event.currentTarget explicitly; it is unambiguous regardless of function type.",
+      "code_example": "button.addEventListener('click', function (event) {\n  console.log(event.target.tagName);        // maybe 'SPAN' (the icon)\n  console.log(event.currentTarget === this); // true\n});",
+      "common_mistakes": [
+        "Using target for styling the element with the listener",
+        "Relying on this inside arrow handlers"
+      ],
+      "follow_ups": [
+        "What is relatedTarget?",
+        "How does delegation use target?"
+      ]
+    },
+    {
+      "slug": "preventdefault-use-cases",
+      "topic": "js-dom-and-events",
+      "position": 5,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What does preventDefault do, and when do you need it?",
+      "short_answer": "preventDefault cancels the browser's built-in action for an event: form submission and page reload, link navigation, checkbox toggling, context menus, drag behaviour, and some key actions. You need it for single-page form handling, custom link behaviour, and keyboard shortcuts. It does not stop propagation.",
+      "detailed_answer": "Only cancelable events can be prevented; event.cancelable tells you. Passive listeners (used for scroll performance) cannot call preventDefault. Calling it on submit stops the navigation so you can validate and send data with fetch instead.\n\nAccessibility caution: preventing default on links or keys can break expected behaviour such as opening in a new tab or tabbing, so prevent only what you replace.",
+      "code_example": "form.addEventListener('submit', async (event) => {\n  event.preventDefault();\n  const data = Object.fromEntries(new FormData(form));\n  await fetch('/api/orders', { method: 'POST', body: JSON.stringify(data), headers: { 'Content-Type': 'application/json' } });\n});",
+      "common_mistakes": [
+        "Thinking it stops bubbling",
+        "Preventing default on every click handler by habit"
+      ],
+      "follow_ups": [
+        "What are passive event listeners?",
+        "How would you handle a form without a page reload?"
+      ]
+    },
+    {
+      "slug": "querying-dom-methods",
+      "topic": "js-dom-and-events",
+      "position": 6,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "How do querySelector, querySelectorAll, getElementById, and getElementsByClassName differ?",
+      "short_answer": "getElementById returns one element by id, fast. querySelector returns the first match of any CSS selector or null. querySelectorAll returns a static NodeList of all matches. getElementsByClassName and getElementsByTagName return live HTMLCollections that update as the DOM changes and lack forEach.",
+      "detailed_answer": "Static versus live is the practical difference: a NodeList snapshot is safe to iterate while modifying the DOM; a live collection changes underneath you. Both querySelector variants accept the full selector language, including attribute and pseudo-class selectors, which makes them the default choice.\n\nScope queries to a container (element.querySelector) rather than document to avoid accidental matches, and cache references when the same element is used repeatedly.",
+      "code_example": "const list = document.getElementById('items');\nconst first = list.querySelector('li.active');\nconst all = list.querySelectorAll('li');          // static NodeList\nconst live = list.getElementsByTagName('li');     // live HTMLCollection\nlist.append(document.createElement('li'));\nconsole.log(all.length, live.length);             // n, n + 1",
+      "common_mistakes": [
+        "Calling map on a NodeList (spread it first)",
+        "Forgetting querySelector can return null"
+      ],
+      "follow_ups": [
+        "What happens if you iterate a live collection while removing items?",
+        "How do you convert a NodeList to an array?"
+      ]
+    },
+    {
+      "slug": "dom-performance-reflow",
+      "topic": "js-dom-and-events",
+      "position": 7,
+      "difficulty": 2,
+      "experience_level": "mid",
+      "is_premium": true,
+      "title": "What causes layout thrashing, and how do you render a large list efficiently?",
+      "short_answer": "Interleaving DOM writes with reads of layout properties (offsetHeight, getBoundingClientRect) forces the browser to recalculate layout repeatedly. Batch reads then writes, build nodes in a DocumentFragment and append once, toggle classes instead of many inline styles, and for very long lists render only the visible window (virtualisation).",
+      "detailed_answer": "The browser defers layout until it must answer a question about geometry. If your loop writes a style then reads a size, every iteration forces a synchronous layout. Separate the phases, or use requestAnimationFrame to schedule writes.\n\nFor rendering, fewer DOM operations win: one replaceChildren with a fragment beats n appends; textContent beats innerHTML for text; CSS classes beat computed inline styles. Above a few thousand rows, keep only visible rows in the DOM and recycle nodes as the user scrolls.",
+      "code_example": "// thrashing: read after each write\nrows.forEach((row) => {\n  row.style.height = 'auto';\n  console.log(row.offsetHeight); // forces layout each time\n});\n\n// batched\nconst heights = rows.map((row) => row.offsetHeight); // reads\nrows.forEach((row, i) => { row.style.height = `${heights[i]}px`; }); // writes",
+      "common_mistakes": [
+        "Blaming JavaScript speed rather than forced layout",
+        "Rendering with innerHTML string concatenation for large lists"
+      ],
+      "follow_ups": [
+        "What is requestAnimationFrame for?",
+        "How does virtualisation work?"
+      ]
+    },
+    {
+      "slug": "form-input-events",
+      "topic": "js-dom-and-events",
+      "position": 8,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What is the difference between the input, change, and submit events?",
+      "short_answer": "input fires immediately every time a control's value changes, including typing and pasting. change fires when the change is committed: on blur for text fields, immediately for checkboxes, radios, and selects. submit fires on the form element when it is submitted by button or Enter, and is where you validate and call preventDefault.",
+      "detailed_answer": "Use input for live feedback such as character counts and search-as-you-type (with debouncing). Use change when you only care about the final value. Listen for submit on the form, not click on the button, so Enter works and screen readers behave.\n\nRemember that input.value is always a string; use valueAsNumber or Number for numeric fields, and .checked for checkboxes.",
+      "code_example": "search.addEventListener('input', (e) => update(e.target.value));\nselect.addEventListener('change', (e) => filterBy(e.target.value));\nform.addEventListener('submit', (e) => {\n  e.preventDefault();\n  if (form.checkValidity()) send(new FormData(form));\n});",
+      "common_mistakes": [
+        "Listening to click on the submit button instead of submit on the form",
+        "Expecting change on every keystroke"
+      ],
+      "follow_ups": [
+        "How would you debounce an input handler?",
+        "What does FormData give you?"
+      ]
+    },
+    {
+      "slug": "dom-ready-and-script-loading",
+      "topic": "js-dom-and-events",
+      "position": 9,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": true,
+      "title": "Why might document.querySelector return null, and how do defer, async, and DOMContentLoaded relate?",
+      "short_answer": "If a script runs before the HTML it targets has been parsed, the element does not exist yet. Fix by placing the script at the end of body, using the defer attribute (runs after parsing, in order), using type=\"module\" (deferred by default), or waiting for DOMContentLoaded. async runs as soon as it downloads, in no guaranteed order, so it suits independent scripts like analytics.",
+      "detailed_answer": "A classic <script> in head blocks parsing and runs immediately, so anything below it is not in the DOM yet. defer downloads in parallel and executes after the document is parsed but before DOMContentLoaded, preserving order between deferred scripts. async executes as soon as it is ready, possibly mid-parse. Module scripts behave like defer unless async is set.\n\nload fires later, after images and stylesheets; DOMContentLoaded is the right moment for DOM setup.",
+      "code_example": "<!-- head -->\n<script src=\"app.js\" defer></script>\n<script type=\"module\" src=\"module.js\"></script>\n<script src=\"analytics.js\" async></script>\n\n// or in app.js without defer:\ndocument.addEventListener('DOMContentLoaded', () => {\n  document.querySelector('#app').textContent = 'ready';\n});",
+      "common_mistakes": [
+        "Using window.onload when DOMContentLoaded is enough",
+        "Assuming async scripts keep their order"
+      ],
+      "follow_ups": [
+        "What is render-blocking?",
+        "How does a bundler decide where scripts go?"
+      ]
+    },
+    {
+      "slug": "settimeout-zero-behavior",
+      "topic": "js-async-and-browser",
+      "position": 1,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What does setTimeout(fn, 0) actually do?",
+      "short_answer": "It schedules fn as a task to run after the current synchronous code and any queued microtasks finish, not immediately. The delay is a minimum; browsers also clamp nested timers to at least 4 ms. It is used to defer work until the call stack is clear, though queueMicrotask and requestAnimationFrame are often better tools.",
+      "detailed_answer": "JavaScript runs on one thread with an event loop. setTimeout hands the callback to the host, which queues a task when the timer expires. The event loop picks tasks only when the stack is empty, so a long synchronous loop delays every timer.\n\nPromise callbacks are microtasks and run before the next task, which is why Promise.resolve().then(log) beats setTimeout(log, 0). If the goal is to run after rendering, requestAnimationFrame is the accurate choice.",
+      "code_example": "console.log('a');\nsetTimeout(() => console.log('timeout'), 0);\nPromise.resolve().then(() => console.log('micro'));\nconsole.log('b');\n// a, b, micro, timeout",
+      "common_mistakes": [
+        "Saying it runs 'immediately' or 'in parallel'",
+        "Not knowing microtasks run first"
+      ],
+      "follow_ups": [
+        "What is the difference between a task and a microtask?",
+        "When would you use requestAnimationFrame?"
+      ]
+    },
+    {
+      "slug": "promise-states-and-chaining",
+      "topic": "js-async-and-browser",
+      "position": 2,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "What are the states of a promise, and how does chaining work?",
+      "short_answer": "A promise is pending, then settles once as fulfilled with a value or rejected with a reason; it never changes again. then returns a new promise resolved with the handler's return value (or adopting a returned promise), so handlers chain. A rejection skips then handlers until a catch, and finally runs either way without changing the value.",
+      "detailed_answer": "Because each then returns a new promise, you can transform values step by step and flatten nested async work by returning promises from handlers. Throwing inside a handler rejects the chain. A catch placed early recovers and continues the chain; placed last it reports.\n\nCommon errors: forgetting to return inside then (the next handler gets undefined), and creating a promise inside a then without returning it, which detaches its errors from the chain.",
+      "code_example": "fetchUser()\n  .then((user) => fetchOrders(user.id))   // returns a promise: adopted\n  .then((orders) => orders.length)\n  .catch((error) => { report(error); return 0; })\n  .finally(() => hideSpinner());",
+      "common_mistakes": [
+        "Not returning from then handlers",
+        "Thinking finally receives the value"
+      ],
+      "follow_ups": [
+        "How does async/await map onto then/catch?",
+        "What happens to an unhandled rejection?"
+      ]
+    },
+    {
+      "slug": "async-await-error-handling",
+      "topic": "js-async-and-browser",
+      "position": 3,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "How do you handle errors with async/await?",
+      "short_answer": "await turns a rejected promise into a thrown exception, so wrap awaits in try/catch/finally like synchronous code. An async function always returns a promise, so errors thrown inside it become rejections for the caller to catch. Forgetting await on a promise means its rejection escapes the try block.",
+      "detailed_answer": "Choose the boundary where you can do something useful: retry, show a message, or convert to a typed error. Rethrow what you cannot handle. For several independent operations use Promise.all (fails fast) or Promise.allSettled (collects every result) rather than sequential awaits.\n\nA subtle trap: `return somePromise` inside try does not catch that promise's rejection, but `return await somePromise` does.",
+      "code_example": "async function loadProfile(id) {\n  try {\n    const [user, orders] = await Promise.all([getJSON(`/u/${id}`), getJSON(`/u/${id}/orders`)]);\n    return { user, orders };\n  } catch (error) {\n    if (error.cause?.status === 404) return null;\n    throw error;\n  } finally {\n    hideSpinner();\n  }\n}",
+      "common_mistakes": [
+        "Wrapping every await in its own try/catch",
+        "Awaiting independent requests one after another"
+      ],
+      "follow_ups": [
+        "What is the difference between Promise.all and Promise.allSettled?",
+        "Why does return await matter inside try?"
+      ]
+    },
+    {
+      "slug": "fetch-error-handling",
+      "topic": "js-async-and-browser",
+      "position": 4,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "Does fetch reject on a 404? How should you handle fetch errors?",
+      "short_answer": "No. fetch resolves for any HTTP response, including 404 and 500; it rejects only on network failure, CORS blocking, or abort. Check response.ok or status before reading the body, throw your own error for failed statuses, and catch network errors separately. Read the body once, with the right method (json, text, blob).",
+      "detailed_answer": "A robust helper checks ok, attaches the response as the error cause, and parses JSON only on success, because an error page may not be JSON. Use AbortController to cancel stale requests (for example, previous search queries) and a timeout.\n\nSending JSON requires the Content-Type header and JSON.stringify. Credentials and CORS behaviour are controlled by options such as credentials and mode.",
+      "code_example": "async function getJSON(url, options) {\n  const response = await fetch(url, options);\n  if (!response.ok) throw new Error(`Request failed: ${response.status}`, { cause: response });\n  return response.json();\n}\n\nconst controller = new AbortController();\ngetJSON('/search?q=tea', { signal: controller.signal });\ncontroller.abort(); // cancels",
+      "common_mistakes": [
+        "Parsing JSON before checking ok",
+        "Reading the body twice"
+      ],
+      "follow_ups": [
+        "What is CORS?",
+        "How would you add a timeout to fetch?"
+      ]
+    },
+    {
+      "slug": "event-loop-microtasks-vs-tasks",
+      "topic": "js-async-and-browser",
+      "position": 5,
+      "difficulty": 2,
+      "experience_level": "mid",
+      "is_premium": true,
+      "title": "Explain the difference between the task queue and the microtask queue.",
+      "short_answer": "Tasks (setTimeout, events, I/O) are taken one at a time by the event loop when the stack is empty, with rendering allowed between them. Microtasks (promise reactions, queueMicrotask, MutationObserver) run to completion right after the current task, before rendering and before the next task, and any microtasks they queue also run in the same drain.",
+      "detailed_answer": "This ordering explains most output-prediction puzzles: synchronous code, then all microtasks, then one task, then microtasks again. It also has performance implications: a chain that keeps queueing microtasks starves rendering, while a long task blocks input.\n\nawait yields to the microtask queue, so `await null` defers to after the current synchronous work but before any timers. requestAnimationFrame callbacks run before the next paint, separate from both queues.",
+      "code_example": "setTimeout(() => console.log('task 1'), 0);\nPromise.resolve()\n  .then(() => { console.log('micro 1'); return Promise.resolve(); })\n  .then(() => console.log('micro 2'));\nqueueMicrotask(() => console.log('micro 3'));\nconsole.log('sync');\n// sync, micro 1, micro 3, micro 2, task 1",
+      "common_mistakes": [
+        "Treating promises and timers as one queue",
+        "Assuming each microtask allows a render in between"
+      ],
+      "follow_ups": [
+        "What is a long task and why does it matter for INP?",
+        "Where does await continue?"
+      ]
+    },
+    {
+      "slug": "localstorage-vs-sessionstorage-vs-cookies",
+      "topic": "js-async-and-browser",
+      "position": 6,
+      "difficulty": 1,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "Compare localStorage, sessionStorage, and cookies.",
+      "short_answer": "localStorage persists until cleared and is shared across tabs of the origin; sessionStorage is per tab and cleared when it closes; both hold about 5 MB of strings, are synchronous, and are never sent to the server. Cookies are small (~4 KB), can expire, are sent with every request to their domain, and can be HttpOnly so scripts cannot read them, which is why session tokens belong in cookies.",
+      "detailed_answer": "Use web storage for preferences, drafts, and caches that only the client needs. Use cookies (set by the server, HttpOnly, Secure, SameSite) for authentication. Never keep secrets in localStorage: any script on the origin, including injected ones, can read it.\n\nFor larger or structured data, IndexedDB is asynchronous and can store objects and blobs. Storage access can throw in private modes, so wrap reads and writes in try/catch.",
+      "code_example": "try {\n  localStorage.setItem('theme', 'dark');\n  const theme = localStorage.getItem('theme') ?? 'light';\n  sessionStorage.setItem('draft', JSON.stringify({ text: 'hi' }));\n} catch {\n  // storage disabled or full\n}",
+      "common_mistakes": [
+        "Storing JWTs in localStorage without discussing XSS",
+        "Storing objects without JSON.stringify"
+      ],
+      "follow_ups": [
+        "What does HttpOnly protect against?",
+        "When would you use IndexedDB?"
+      ]
+    },
+    {
+      "slug": "es-modules-vs-commonjs",
+      "topic": "js-async-and-browser",
+      "position": 7,
+      "difficulty": 2,
+      "experience_level": "mid",
+      "is_premium": true,
+      "title": "What is the difference between ES modules and CommonJS?",
+      "short_answer": "ES modules use import/export, are resolved statically before execution (enabling tree shaking and live bindings), run in strict mode, and load asynchronously in browsers. CommonJS uses require/module.exports, resolves synchronously at runtime, and copies values at require time. Browsers support only ESM natively; Node supports both.",
+      "detailed_answer": "Static structure means bundlers can see the import graph without running code, drop unused exports, and split code with dynamic import(). Live bindings mean an importer sees updates to an exported let. CommonJS is still common in older Node packages, and interop rules (default imports of CJS modules, no named exports without analysis) are a frequent source of confusion.\n\nIn the browser, <script type=\"module\"> is deferred, scoped, and fetched with CORS; bare specifiers need an import map or a bundler.",
+      "code_example": "// ESM\nexport const rate = 0.18;\nexport default function total(n) { return n * (1 + rate); }\nimport total, { rate } from './tax.js';\n\n// CommonJS\nconst { rate } = require('./tax.cjs');\nmodule.exports = { rate };",
+      "common_mistakes": [
+        "Saying the only difference is syntax",
+        "Not knowing ESM imports are hoisted and evaluated once"
+      ],
+      "follow_ups": [
+        "What is tree shaking?",
+        "What does dynamic import() return?"
+      ]
+    },
+    {
+      "slug": "abortcontroller-cancel-fetch",
+      "topic": "js-async-and-browser",
+      "position": 8,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "How do you cancel a fetch request, and why would you?",
+      "short_answer": "Create an AbortController, pass controller.signal in the fetch options, and call controller.abort() to cancel. The fetch promise rejects with an AbortError, which you catch and ignore. Cancel stale requests such as previous search queries so an older response cannot overwrite a newer one, and to implement timeouts.",
+      "detailed_answer": "A signal can be shared by several requests so one abort cancels them all, and AbortSignal.timeout(ms) creates a signal that aborts automatically. Once aborted a controller cannot be reused; create a new one per request cycle.\n\nIn UI code, keep the current controller in a variable: when the user types again, abort the previous controller, create a new one, and fetch. In the catch, check error.name === 'AbortError' and return quietly, because that path is expected, not a failure.",
+      "code_example": "let controller;\n\nasync function search(query) {\n  controller?.abort();\n  controller = new AbortController();\n  try {\n    const res = await fetch(`/search?q=${encodeURIComponent(query)}`, { signal: controller.signal });\n    return await res.json();\n  } catch (error) {\n    if (error.name === 'AbortError') return null; // expected\n    throw error;\n  }\n}\n\nfetch('/slow', { signal: AbortSignal.timeout(5000) });",
+      "common_mistakes": [
+        "Treating AbortError as a real failure and showing an error message",
+        "Reusing an aborted controller for the next request"
+      ],
+      "follow_ups": [
+        "How would you combine abort with debounce?",
+        "Can you abort other async work with the same signal?"
+      ]
+    },
+    {
+      "slug": "cors-basics",
+      "topic": "js-async-and-browser",
+      "position": 9,
+      "difficulty": 2,
+      "experience_level": "mid",
+      "is_premium": true,
+      "title": "What is CORS and why does the browser block my request?",
+      "short_answer": "CORS is the mechanism by which a server tells browsers which other origins may read its responses. The browser enforces the same-origin policy: a script on one origin can send a request to another, but cannot read the response unless the server replies with Access-Control-Allow-Origin covering the caller. Non-simple requests trigger a preflight OPTIONS request first.",
+      "detailed_answer": "An origin is scheme + host + port. Simple requests (GET/POST with basic headers) are sent directly and the response is checked. Requests with custom headers, JSON content type, or methods like PUT trigger a preflight; the server must answer OPTIONS with the allowed methods and headers. Credentials require Access-Control-Allow-Credentials and an explicit origin, not *.\n\nCORS errors are fixed on the server (or via a proxy you control), never by client-side flags. Tools like curl do not enforce it, which is why 'it works in Postman' is not evidence.",
+      "code_example": "// Browser console for a cross-origin fetch without headers:\n// Access to fetch at 'https://api.example.com/x' from origin 'https://app.example.com'\n// has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present.\n\n// Server response that allows it:\n// Access-Control-Allow-Origin: https://app.example.com\n// Access-Control-Allow-Methods: GET, POST\n// Access-Control-Allow-Headers: Content-Type",
+      "common_mistakes": [
+        "Trying to 'add CORS headers' on the client",
+        "Thinking mode: 'no-cors' lets you read the response"
+      ],
+      "follow_ups": [
+        "What triggers a preflight request?",
+        "How would you call a third-party API that does not support CORS?"
+      ]
+    },
+    {
+      "slug": "promise-all-vs-allsettled-race",
+      "topic": "js-async-and-browser",
+      "position": 10,
+      "difficulty": 2,
+      "experience_level": "junior",
+      "is_premium": false,
+      "title": "When would you use Promise.allSettled, race, or any instead of Promise.all?",
+      "short_answer": "all resolves with every value once all succeed and rejects immediately on the first failure. allSettled always resolves with a status/value/reason record per promise. race settles with whichever promise settles first, success or failure. any resolves with the first success and rejects only if all fail (AggregateError).",
+      "detailed_answer": "Use all for independent work that must all succeed (parallel fetches), allSettled when partial results are useful (a dashboard with several widgets), race for timeouts (race the request against a timer), and any for fallbacks such as trying several mirrors.\n\nAll of them accept iterables of promises or plain values and start nothing themselves; the promises are already running when created.",
+      "code_example": "const results = await Promise.allSettled([getJSON('/a'), getJSON('/b')]);\nconst ok = results.filter((r) => r.status === 'fulfilled').map((r) => r.value);\n\nconst withTimeout = (p, ms) => Promise.race([\n  p,\n  new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),\n]);",
+      "common_mistakes": [
+        "Expecting all to wait for the rest after one rejection",
+        "Confusing race with any"
+      ],
+      "follow_ups": [
+        "How would you limit concurrency to N at a time?",
+        "What does AggregateError contain?"
+      ]
+    }
+  ]
+}

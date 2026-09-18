@@ -1,0 +1,565 @@
+[
+  {
+    "slug": "conditionals-and-switch",
+    "module": "control-flow",
+    "position": 1,
+    "difficulty": 1,
+    "estimated_minutes": 14,
+    "access_level": "free",
+    "title": "Conditionals & switch",
+    "summary": "Choose between branches with if/else, the conditional operator, and switch, and know which one reads best in each situation.",
+    "objectives": [
+      "Write if / else if / else chains that cover every case",
+      "Use the conditional operator only for short two-way choices",
+      "Explain how switch matches cases and why break matters"
+    ],
+    "prerequisites": [
+      "operators-and-equality"
+    ],
+    "practice_link": "fizzbuzz-variant",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Branching on a condition",
+        "body": "An `if` statement evaluates its condition, converts the result to a boolean, and runs the block only when that boolean is `true`. Add `else` for the other path and `else if` to test further conditions in order; the first branch whose condition is truthy wins and the rest are skipped, so put the most specific test first.\n\nThe conditional operator `condition ? a : b` is an expression: it produces a value, which makes it ideal for assigning one of two values or returning one of two results. Nesting it, or using it to run side effects, makes code hard to scan, so treat it as a tool for short choices only.\n\n`switch` compares one value against a list of `case` labels using strict equality (`===`). Execution starts at the first matching case and continues into the following cases until it meets `break` or the end of the block. That fall-through is deliberate and occasionally useful, for example when several cases share one body, but forgetting `break` is one of the most common beginner bugs. A `default` label catches values that match nothing.\n\nWhichever form you use, aim for branches that a reader can check off: every possible input should land somewhere obvious."
+      },
+      {
+        "type": "example",
+        "title": "Ordered conditions",
+        "body": "The order of the chain matters. Testing `>= 90` before `>= 75` keeps each branch simple.",
+        "code": "function grade(score) {\n  if (score >= 90) return 'A';\n  else if (score >= 75) return 'B';\n  else if (score >= 60) return 'C';\n  return 'Needs work';\n}\n\nconsole.log(grade(91)); // 'A'\nconsole.log(grade(75)); // 'B'\nconsole.log(grade(12)); // 'Needs work'",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "switch with grouped cases",
+        "body": "Two cases share a body by omitting `break` between them. `default` handles anything else.",
+        "code": "function shippingDays(region) {\n  switch (region) {\n    case 'metro':\n    case 'city':\n      return 1;\n    case 'rural':\n      return 4;\n    default:\n      return 7;\n  }\n}\n\nconsole.log(shippingDays('city'));  // 1\nconsole.log(shippingDays('island')); // 7",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Writing `if (x = 5)` (assignment) when `if (x === 5)` (comparison) was intended. The assignment succeeds and the condition is always truthy.\n- Forgetting `break` in `switch`, so a match runs every later case as well.\n- Comparing with `==` in an `if` and being surprised that `'0'` equals `0`.\n- Deeply nested conditionals where a lookup object or an early return would be clearer."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Interviewers rarely ask about `if` directly, but they watch whether you cover every branch, whether you reach for `switch` when a plain object lookup would be clearer, and whether you can explain `switch` fall-through without hesitation. A crisp answer: \"switch uses strict equality and falls through until it hits break.\""
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "Apply ordered conditions in the **FizzBuzz variant** problem, where the order of your checks decides whether the answer is right."
+      }
+    ],
+    "sources": [
+      {
+        "title": "if...else — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/if...else",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "switch — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "ECMAScript Language Specification: The switch Statement",
+        "url": "https://tc39.es/ecma262/#sec-switch-statement",
+        "publisher": "Ecma International"
+      }
+    ]
+  },
+  {
+    "slug": "loops-and-iteration",
+    "module": "control-flow",
+    "position": 2,
+    "difficulty": 1,
+    "estimated_minutes": 16,
+    "access_level": "free",
+    "title": "Loops & iteration",
+    "summary": "Repeat work with for, while, for...of, and for...in, and pick the loop that states your intent most clearly.",
+    "objectives": [
+      "Trace a for loop's initialiser, condition, and update step",
+      "Choose for...of for values and for...in for keys",
+      "Use break and continue deliberately"
+    ],
+    "prerequisites": [
+      "conditionals-and-switch"
+    ],
+    "practice_link": "sum-of-multiples",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Four loops, four intents",
+        "body": "A classic `for` loop has three parts: an initialiser that runs once, a condition checked before every iteration, and an update that runs after each iteration. It is the right choice when you need the index itself or a custom step.\n\n`while` repeats as long as its condition is truthy and is natural when you do not know the number of iterations in advance, for example reading until a queue is empty. `do...while` runs the body at least once before checking.\n\n`for...of` iterates the *values* of anything iterable: arrays, strings, Maps, Sets, and more. It is the cleanest way to say \"for each item\". `for...in` iterates the *enumerable string keys* of an object, including inherited ones, and its order is not guaranteed for arrays, so avoid it for arrays.\n\n`break` leaves the loop immediately; `continue` skips to the next iteration. Both are fine when they make the loop simpler, but if you find yourself using several, consider extracting a function and returning early instead.\n\nBecause `let` creates a fresh binding for each iteration, callbacks created inside a `for (let i …)` loop each remember their own `i`. With `var`, they would all share one."
+      },
+      {
+        "type": "example",
+        "title": "Index versus value",
+        "body": "Use the index when you need positions; use `for...of` when you only need values.",
+        "code": "const prices = [120, 80, 45];\n\nfor (let i = 0; i < prices.length; i++) {\n  console.log(`#${i + 1}: ${prices[i]}`);\n}\n\nlet total = 0;\nfor (const price of prices) total += price;\nconsole.log(total); // 245",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Stopping early",
+        "body": "`break` ends the search as soon as a match is found, avoiding needless work.",
+        "code": "const orders = ['paid', 'paid', 'failed', 'paid'];\nlet firstFailure = -1;\n\nfor (let i = 0; i < orders.length; i++) {\n  if (orders[i] === 'failed') {\n    firstFailure = i;\n    break;\n  }\n}\nconsole.log(firstFailure); // 2",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Off-by-one errors: `i <= arr.length` reads one past the end and yields `undefined`.\n- Using `for...in` on arrays and getting string keys (`'0'`, `'1'`) plus any added properties.\n- Mutating the array you are iterating (removing items shifts later indexes).\n- Infinite `while` loops because the condition never changes inside the body."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Expect questions such as \"what is the difference between for...of and for...in?\" and output-prediction snippets that close over a loop variable declared with `let` versus `var`. Being able to say that `let` gives each iteration its own binding is a strong signal."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "Try **Sum of multiples**, which rewards choosing the right loop and stopping condition."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Loops and iteration — JavaScript guide",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Loops_and_iteration",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "for...of — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...of",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "guard-clauses-and-early-return",
+    "module": "control-flow",
+    "position": 3,
+    "difficulty": 1,
+    "estimated_minutes": 12,
+    "access_level": "free",
+    "title": "Guard clauses & early return",
+    "summary": "Flatten nested conditionals by handling the exceptional cases first and returning early.",
+    "objectives": [
+      "Recognise nesting that a guard clause would remove",
+      "Return early for invalid input without losing readability",
+      "Replace long if/else chains with lookup objects when the mapping is data"
+    ],
+    "prerequisites": [
+      "conditionals-and-switch"
+    ],
+    "practice_link": "validate-username",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Handle the edges first",
+        "body": "A guard clause is an `if` at the top of a function that deals with an unusual or invalid input and returns (or throws) immediately. Everything after it can assume the input is normal, so the main path stays at one level of indentation. Code reviewers like this because the reader sees the assumptions up front instead of discovering them in a final `else`.\n\nEarly return works with any exit: `return`, `throw`, `continue` in a loop, or `break`. The habit is to ask \"what must be true for the rest of this function to make sense?\" and check those things at the top.\n\nA related refactor is replacing a chain of `if (x === 'a') … else if (x === 'b') …` with a plain object or `Map` that maps inputs to outputs. When the branches only differ by data, a lookup is shorter, easier to extend, and easier to test.\n\nThe goal is not to minimise lines. It is to make the happy path obvious and the edge cases explicit."
+      },
+      {
+        "type": "example",
+        "title": "Before and after",
+        "body": "The nested version hides the main work three levels deep. The guarded version reads top to bottom.",
+        "code": "// Nested\nfunction discountNested(user, cart) {\n  if (user) {\n    if (cart.items.length > 0) {\n      if (user.isMember) return cart.total * 0.9;\n      else return cart.total;\n    } else return 0;\n  } else return 0;\n}\n\n// Guarded\nfunction discount(user, cart) {\n  if (!user) return 0;\n  if (cart.items.length === 0) return 0;\n  return user.isMember ? cart.total * 0.9 : cart.total;\n}",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "A lookup instead of a chain",
+        "body": "When each branch only returns a different value, data beats branching.",
+        "code": "const labels = { paid: 'Paid', pending: 'Awaiting payment', failed: 'Payment failed' };\n\nfunction statusLabel(status) {\n  return labels[status] ?? 'Unknown status';\n}\n\nconsole.log(statusLabel('pending'));  // 'Awaiting payment'\nconsole.log(statusLabel('refunded')); // 'Unknown status'",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Guarding with `if (!value)` when `0` or `''` are valid inputs; check `value == null` or the specific case instead.\n- Returning different *types* from different exits (a number from one, `undefined` from another) and forcing callers to check.\n- Turning every conditional into a lookup, even when branches contain real logic."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "In live coding, interviewers notice whether you validate inputs before the main logic and whether your function reads top to bottom. Saying \"I'll guard against empty input first\" is a small habit that signals experience."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Validate a username** is built for guard clauses: several rules, each a reason to return early."
+      }
+    ],
+    "sources": [
+      {
+        "title": "return — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/return",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Nullish coalescing operator (??)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "declarations-expressions-arrows",
+    "module": "functions",
+    "position": 1,
+    "difficulty": 1,
+    "estimated_minutes": 16,
+    "access_level": "free",
+    "title": "Declarations, expressions & arrows",
+    "summary": "Three ways to create a function, how hoisting treats each, and when arrow functions are the wrong choice.",
+    "objectives": [
+      "Explain why a declaration can be called before its line but an expression cannot",
+      "Write arrow functions with implicit and explicit returns",
+      "Identify situations where an arrow function's this is a problem"
+    ],
+    "prerequisites": [
+      "scope-and-closures"
+    ],
+    "practice_link": "compose-greeting",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Three syntaxes, two behaviours",
+        "body": "A **function declaration** (`function name() {}`) is hoisted with its body, so it can be called anywhere in its scope, even above the line where it is written. That makes declarations good for top-level helpers.\n\nA **function expression** assigns a function to a variable (`const f = function () {}`). The variable follows normal `const`/`let` rules: it exists only after its line runs, so calling it earlier throws a ReferenceError. Expressions are useful when you want the function to be a value, for example passed as an argument or stored in an object.\n\nAn **arrow function** (`const f = () => {}`) is a shorter expression syntax with two important differences: it has no `this` of its own (it uses the `this` of the surrounding code), and it has no `arguments` object and cannot be used with `new`. A single expression body returns its value implicitly; a block body needs an explicit `return`.\n\nBecause arrows inherit `this`, they are ideal for callbacks inside methods and awkward as object methods that need `this` to be the object. Choose the syntax by what the function needs, not by fashion."
+      },
+      {
+        "type": "example",
+        "title": "Hoisting in action",
+        "body": "The declaration works early; the expression does not exist yet.",
+        "code": "console.log(square(4)); // 16\n\nfunction square(n) {\n  return n * n;\n}\n\ntry {\n  console.log(double(4));\n} catch (error) {\n  console.log(error.name); // 'ReferenceError'\n}\n\nconst double = (n) => n * 2;",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Implicit return and returning an object",
+        "body": "Wrap an object literal in parentheses or the braces are read as a block.",
+        "code": "const toLabel = (item) => `${item.name} (${item.qty})`;\nconst toPoint = (x, y) => ({ x, y });\n\nconsole.log(toLabel({ name: 'Tea', qty: 2 })); // 'Tea (2)'\nconsole.log(toPoint(1, 2));                     // { x: 1, y: 2 }",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- `const f = () => { x: 1 }` returns `undefined`; the braces are a block, not an object.\n- Using an arrow function as an object method and expecting `this` to be the object.\n- Relying on hoisting so much that helper definitions end up far below their first use."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"What is the difference between a function declaration and a function expression?\" and \"when should you not use an arrow function?\" are near-certain questions at junior level. Answer with hoisting and `this`, and give one concrete example of each."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Compose a greeting** asks you to build small functions from other functions using all three syntaxes."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Functions — JavaScript guide",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Arrow function expressions",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "ECMAScript Language Specification: Function Definitions",
+        "url": "https://tc39.es/ecma262/#sec-function-definitions",
+        "publisher": "Ecma International"
+      }
+    ]
+  },
+  {
+    "slug": "parameters-defaults-rest-spread",
+    "module": "functions",
+    "position": 2,
+    "difficulty": 1,
+    "estimated_minutes": 15,
+    "access_level": "free",
+    "title": "Parameters, defaults, rest & spread",
+    "summary": "Accept flexible input with default values and rest parameters, and pass collections apart with spread.",
+    "objectives": [
+      "Apply default parameter values and know when they trigger",
+      "Collect variable arguments with a rest parameter",
+      "Spread arrays and objects into calls and literals"
+    ],
+    "prerequisites": [
+      "declarations-expressions-arrows"
+    ],
+    "practice_link": "average-of-arguments",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Flexible inputs without ceremony",
+        "body": "A **default parameter** (`function f(a, b = 10)`) is used when the argument is `undefined`, either because it was omitted or because `undefined` was passed explicitly. `null` does *not* trigger the default; it is a real value. Defaults are evaluated at call time, left to right, so a later default can use an earlier parameter.\n\nA **rest parameter** (`...items`) must be last and collects every remaining argument into a real array. It replaces the old `arguments` object and works in arrow functions too.\n\n**Spread** uses the same three dots on the other side: in a call, `f(...arr)` passes each element as a separate argument; in an array literal, `[...a, ...b]` copies elements into a new array; in an object literal, `{ ...obj, x: 1 }` copies own enumerable properties and lets later keys override earlier ones.\n\nSpread copies are *shallow*: nested objects are shared with the original. That is fine for most updates but matters when you later mutate the nested part."
+      },
+      {
+        "type": "example",
+        "title": "Defaults and rest together",
+        "body": "`undefined` triggers the default; `null` does not. The rest parameter is a real array with `length` and array methods.",
+        "code": "function total(taxRate = 0.18, ...amounts) {\n  const sum = amounts.reduce((acc, n) => acc + n, 0);\n  return sum * (1 + taxRate);\n}\n\nconsole.log(total(undefined, 100, 50)); // 177\nconsole.log(total(0, 100, 50));         // 150\nconsole.log(total(null, 100));          // 100 * (1 + null) -> 100",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Spread for copies and overrides",
+        "body": "Later keys win, and the original is left untouched.",
+        "code": "const base = { theme: 'dark', fontSize: 14 };\nconst custom = { ...base, fontSize: 16 };\nconsole.log(custom);      // { theme: 'dark', fontSize: 16 }\nconsole.log(base.fontSize); // 14\n\nconst nums = [3, 9, 1];\nconsole.log(Math.max(...nums)); // 9",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Expecting a default to apply for `null`.\n- Placing a rest parameter anywhere but last (a syntax error).\n- Assuming `{ ...obj }` deep-copies nested objects.\n- Spreading a very large array into `Math.max(...arr)`, which can exceed the argument limit."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Expect \"what is the difference between rest and spread?\" and a snippet mixing `undefined` and `null` with defaults. The precise answer about `undefined` (not `null`) triggering defaults separates candidates who have read the rules from those who guess."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Average of arguments** uses a rest parameter and a default to handle any number of inputs."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Default parameters",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Default_parameters",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Rest parameters",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Spread syntax (...)",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "callbacks-and-higher-order-functions",
+    "module": "functions",
+    "position": 3,
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "access_level": "pro",
+    "title": "Callbacks & higher-order functions",
+    "summary": "Pass functions as values, return functions from functions, and read code that does both.",
+    "objectives": [
+      "Define a higher-order function and give two built-in examples",
+      "Write a function that returns a configured function",
+      "Trace when a callback runs relative to the code around it"
+    ],
+    "prerequisites": [
+      "declarations-expressions-arrows",
+      "scope-and-closures"
+    ],
+    "practice_link": "make-multiplier",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Functions are values",
+        "body": "In JavaScript a function is an object, so it can be stored in a variable, placed in an array, passed to another function, or returned from one. A function that takes or returns a function is a **higher-order function**. `Array.prototype.map`, `filter`, `addEventListener`, and `setTimeout` all take callbacks; `bind` returns a new function.\n\nA **callback** is simply the function you pass to be called later. Some callbacks run immediately and synchronously (`map` calls yours for each element before returning), while others run after an event or delay (`setTimeout`, `addEventListener`). Knowing which is which is essential for predicting output order.\n\nReturning a function is how you build small **factories**: call `makeMultiplier(3)` once and get back a function that remembers `3` through its closure. This pattern is the foundation of currying, memoisation, and most utility libraries.\n\nWrite higher-order code so that the reader can see the shape: name the callback parameter for what it receives, keep callbacks short, and avoid nesting more than two levels deep."
+      },
+      {
+        "type": "example",
+        "title": "Passing behaviour",
+        "body": "`applyTwice` does not care what `fn` does; it only knows how to call it.",
+        "code": "function applyTwice(fn, value) {\n  return fn(fn(value));\n}\n\nconst addFive = (n) => n + 5;\nconst shout = (s) => s.toUpperCase() + '!';\n\nconsole.log(applyTwice(addFive, 10));  // 20\nconsole.log(applyTwice(shout, 'go')); // 'GO!!'",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Returning a configured function",
+        "body": "Each returned function keeps its own `factor` through closure.",
+        "code": "function makeMultiplier(factor) {\n  return (n) => n * factor;\n}\n\nconst double = makeMultiplier(2);\nconst triple = makeMultiplier(3);\n\nconsole.log(double(7)); // 14\nconsole.log(triple(7)); // 21\nconsole.log([1, 2, 3].map(double)); // [2, 4, 6]",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Calling the callback when passing it: `setTimeout(tick(), 1000)` passes `tick`'s *result*, not `tick`.\n- Assuming every callback is asynchronous; `map` and `forEach` run yours synchronously.\n- Building callback pyramids instead of extracting named functions or using promises."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "\"What is a higher-order function?\" is a standard warm-up; a stronger answer names built-ins and writes `makeMultiplier` from memory. Output-order questions often hinge on whether a callback runs synchronously."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Make a multiplier** asks for exactly the factory pattern above, then extends it."
+      },
+      {
+        "type": "summary",
+        "title": "Key takeaways",
+        "body": "Functions are values: you can pass them in, return them, and store them. A higher-order function does at least one of those. Callbacks passed to array methods run synchronously and immediately; callbacks passed to timers and event listeners run later. Factories such as makeMultiplier return functions that remember their configuration through closure, which is the pattern behind currying, memoisation, and most utility libraries you will use at work."
+      }
+    ],
+    "sources": [
+      {
+        "title": "First-class Function — MDN glossary",
+        "url": "https://developer.mozilla.org/en-US/docs/Glossary/First-class_Function",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Callback function — MDN glossary",
+        "url": "https://developer.mozilla.org/en-US/docs/Glossary/Callback_function",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "object-literals-and-property-access",
+    "module": "objects",
+    "position": 1,
+    "difficulty": 1,
+    "estimated_minutes": 14,
+    "access_level": "free",
+    "title": "Object literals & property access",
+    "summary": "Create objects with literal syntax, read and write properties with dot and bracket notation, and check whether a key exists.",
+    "objectives": [
+      "Use shorthand properties and computed keys",
+      "Choose bracket notation when the key is dynamic",
+      "Distinguish a missing property from one set to undefined"
+    ],
+    "prerequisites": [
+      "variables-and-types"
+    ],
+    "practice_link": "count-words",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "Keys, values and access",
+        "body": "An object literal is a comma-separated list of `key: value` pairs inside braces. Keys are strings (or symbols); if you write a number or an identifier as a key it is converted to a string. When a variable has the same name as the key you can use **shorthand** (`{ name, age }`), and a key computed at runtime goes in square brackets: `{ [`item-${id}`]: value }`.\n\n**Dot notation** (`user.name`) works when the key is a valid identifier that you know while writing the code. **Bracket notation** (`user['first name']`, `user[key]`) is required when the key contains spaces or other characters, or when it lives in a variable.\n\nReading a key that does not exist gives `undefined`, and so does reading a key that was explicitly set to `undefined`. To tell them apart use `'key' in obj` or `Object.hasOwn(obj, 'key')`. `delete obj.key` removes a property entirely.\n\n`Object.keys`, `Object.values`, and `Object.entries` turn an object into arrays so you can loop, filter, or map over its contents."
+      },
+      {
+        "type": "example",
+        "title": "Shorthand, computed keys and brackets",
+        "body": "The key stored in `field` decides which property is read.",
+        "code": "const name = 'Asha';\nconst age = 29;\nconst field = 'age';\n\nconst person = { name, age, ['id-' + 7]: true };\n\nconsole.log(person[field]);   // 29\nconsole.log(person['id-7']);  // true\nconsole.log(Object.keys(person)); // ['name', 'age', 'id-7']",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Missing versus undefined",
+        "body": "`in` reports presence of the key, not the truthiness of its value.",
+        "code": "const settings = { theme: undefined };\n\nconsole.log(settings.theme);        // undefined\nconsole.log(settings.language);     // undefined\nconsole.log('theme' in settings);    // true\nconsole.log('language' in settings); // false\n\ndelete settings.theme;\nconsole.log('theme' in settings);    // false",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- `obj.key` when `key` is a variable; that looks up a property literally named `key`.\n- Assuming numeric keys stay numbers: `Object.keys({ 1: 'a' })` gives `['1']`.\n- Using `obj.key === undefined` to detect a missing key.\n- Comparing two objects with `===` and expecting equal contents to be equal."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "Counting occurrences with an object as a map is a classic first task. Interviewers also like \"how do you check whether an object has a property?\" and expect `in`, `Object.hasOwn`, and the difference from reading `undefined`."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Count words** uses an object as a tally and needs bracket notation throughout."
+      },
+      {
+        "type": "summary",
+        "title": "Key takeaways",
+        "body": "Object keys are strings (or symbols); values can be anything. Use dot notation for fixed names you know while writing code and bracket notation for dynamic or unusual keys. Reading a missing key gives undefined, so use the in operator or Object.hasOwn when you need to know whether a key exists. Object.keys, values, and entries convert an object into arrays you can loop over, and objects compare by reference, never by content."
+      }
+    ],
+    "sources": [
+      {
+        "title": "Working with objects — JavaScript guide",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Working_with_objects",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Object.hasOwn()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwn",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  },
+  {
+    "slug": "methods-and-this-basics",
+    "module": "objects",
+    "position": 2,
+    "difficulty": 2,
+    "estimated_minutes": 18,
+    "access_level": "free",
+    "title": "Methods & this basics",
+    "summary": "Attach behaviour to objects with methods and learn the one rule that decides what this refers to.",
+    "objectives": [
+      "Write methods with shorthand syntax",
+      "State the call-site rule for this",
+      "Predict this in a detached method, a callback, and an arrow function"
+    ],
+    "prerequisites": [
+      "object-literals-and-property-access",
+      "declarations-expressions-arrows"
+    ],
+    "practice_link": "bank-account-object",
+    "blocks": [
+      {
+        "type": "explanation",
+        "title": "this is decided by the call, not the definition",
+        "body": "A **method** is a function stored as a property. Method shorthand (`greet() { … }`) is the usual way to write one. Inside a regular function, `this` is bound when the function is *called*: if it is called as `obj.method()`, `this` is `obj`. If the same function is called on its own, `this` is `undefined` in strict mode (modules and classes are always strict).\n\nThat single rule explains the classic bugs. Assigning `const g = obj.greet` and calling `g()` loses the object. Passing `obj.greet` as a callback to `setTimeout` or an event listener does the same, because the caller invokes it without an object.\n\n**Arrow functions** do not have their own `this`; they use the `this` of the surrounding scope at the time they were created. That is why an arrow callback inside a method still sees the object, and why an arrow used *as* a method does not.\n\nWhen you need to force a particular `this`, `fn.call(obj, …)` and `fn.apply(obj, […])` invoke immediately, and `fn.bind(obj)` returns a new function permanently bound to `obj`."
+      },
+      {
+        "type": "example",
+        "title": "Losing and keeping this",
+        "body": "The detached call has no object; `bind` restores one.",
+        "code": "const counter = {\n  count: 0,\n  increment() {\n    this.count += 1;\n    return this.count;\n  },\n};\n\nconsole.log(counter.increment()); // 1\n\nconst detached = counter.increment;\ntry {\n  detached();\n} catch (error) {\n  console.log(error.name); // 'TypeError' (this is undefined)\n}\n\nconst bound = counter.increment.bind(counter);\nconsole.log(bound()); // 2",
+        "code_language": "javascript"
+      },
+      {
+        "type": "example",
+        "title": "Arrow callbacks inside methods",
+        "body": "The arrow keeps the method's `this`; a regular function callback would not.",
+        "code": "const cart = {\n  items: [10, 20],\n  taxRate: 0.1,\n  totals() {\n    return this.items.map((price) => price * (1 + this.taxRate));\n  },\n};\n\nconsole.log(cart.totals()); // [11, 22]",
+        "code_language": "javascript"
+      },
+      {
+        "type": "common_mistakes",
+        "title": "Common mistakes",
+        "body": "- Defining a method as an arrow function and expecting `this` to be the object.\n- Passing `obj.method` directly as a callback without binding.\n- Believing `this` is \"the function\" or \"where it was written\" rather than how it was called."
+      },
+      {
+        "type": "interview_relevance",
+        "title": "How this shows up in interviews",
+        "body": "`this` is one of the most frequent junior and mid-level topics. A reliable answer: \"For regular functions, `this` is set by the call site; arrows inherit it lexically; call/apply/bind override it.\" Then walk through the detached-method example."
+      },
+      {
+        "type": "practice_link",
+        "title": "Practice",
+        "body": "**Bank account object** has methods that must share state through `this` and survive being passed around."
+      }
+    ],
+    "sources": [
+      {
+        "title": "this — JavaScript reference",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this",
+        "publisher": "MDN Web Docs"
+      },
+      {
+        "title": "Function.prototype.bind()",
+        "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/bind",
+        "publisher": "MDN Web Docs"
+      }
+    ]
+  }
+]
