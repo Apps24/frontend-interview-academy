@@ -1,4 +1,5 @@
 -- Neutralize answer material that sits in publicly readable columns.
+-- Version matches the migration already recorded by hosted Supabase.
 --
 -- RLS gates rows, not columns, so two columns readable by anon carried answer
 -- material that belongs behind the entitlement gate:

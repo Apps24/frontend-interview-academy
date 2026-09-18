@@ -16,7 +16,7 @@ const ROOT = resolve(import.meta.dirname, "..");
 const SOURCE = resolve(ROOT, "content/javascript-beginner/public-previews.json");
 const TARGET = resolve(
   ROOT,
-  "supabase/migrations/20260918130427_neutralize_public_answer_material.sql",
+  "supabase/migrations/20260918130638_neutralize_public_answer_material.sql",
 );
 
 type Previews = {
@@ -56,6 +56,7 @@ const previewRows = Object.entries(previews.premiumInterviewPreviews)
   .join(",\n");
 
 const sql = `-- Neutralize answer material that sits in publicly readable columns.
+-- Version matches the migration already recorded by hosted Supabase.
 --
 -- RLS gates rows, not columns, so two columns readable by anon carried answer
 -- material that belongs behind the entitlement gate:
