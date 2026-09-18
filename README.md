@@ -2,7 +2,7 @@
 
 A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and deadline-driven interview preparation.
 
-## Current Phase 1 slice
+## Current Phase 2 slice
 
 - Responsive dark product homepage
 - HTML/CSS/JavaScript track previews
@@ -12,6 +12,9 @@ A Next.js learning platform for HTML, CSS, JavaScript, coding practice, and dead
 - Protected learner progress dashboard
 - Interactive knowledge check with per-user Supabase persistence
 - Durable lesson completion and quiz-attempt history
+- Six original JavaScript foundation lessons with saved checkpoints
+- Two-day interview sprint with ten focused sessions
+- Per-user sprint completion protected by Row Level Security
 - Supabase schema with per-user RLS policies
 - Supabase browser/server client factories using publishable keys
 - Cloudflare vinext configuration with a verified production build
@@ -29,7 +32,7 @@ Run `npm run check` before committing.
 
 ## Database
 
-Migrations are in `supabase/migrations`. They separate public published curriculum from owner-only progress, attempts, profiles, and entitlements, and seed the first published JavaScript checkpoint with stable IDs. Secret/service credentials must never be placed in `NEXT_PUBLIC_*` variables.
+Migrations are in `supabase/migrations`. They separate public published curriculum from owner-only lesson progress, sprint progress, attempts, profiles, and entitlements. Six JavaScript checkpoints use stable IDs so application content and saved progress remain aligned. Secret/service credentials must never be placed in `NEXT_PUBLIC_*` variables.
 
 Hosted project: `frontend-interview-academy` (`gverxjnipznemvmdxdxf`) in Mumbai. Local development uses the publishable key in the ignored `.env.local`; no privileged key is required by the browser application.
 

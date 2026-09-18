@@ -19,3 +19,11 @@ Page views do not equal completion. Durable completion requires a checkpoint att
 ## ADR-005: Authentication
 
 Supabase Auth sessions are stored in cookies through `@supabase/ssr`. Next.js Proxy refreshes and validates the token with `getClaims()`, and every protected page and server action independently verifies the claims before reading or mutating user data. Only the publishable key is available to browser code.
+
+## ADR-006: Two-day sprint
+
+The sprint schedule is versioned application content, while `sprint_item_progress` stores only user ownership, the stable item key, and completion timestamps. Server actions validate keys against the application catalog before mutation. RLS restricts every select, insert, update, and delete to `auth.uid() = user_id`.
+
+## ADR-007: Curriculum expansion
+
+Phase 2 follows a progressive JavaScript topic order—expressions, values, conversion, equality, closures, then asynchronous flow—while keeping all explanations, examples, questions, and interview notes original. Stable database UUIDs connect published curriculum rows to per-user progress without coupling lesson prose to database rendering.

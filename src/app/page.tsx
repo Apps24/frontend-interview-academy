@@ -1,14 +1,8 @@
 import Link from "next/link";
 
 import { SiteHeader } from "@/components/site-header";
+import { sprintItems } from "@/lib/interview-sprint";
 import { tracks } from "@/lib/curriculum";
-
-const sprintItems = [
-  { time: "09:00", title: "JavaScript diagnostic", meta: "25 questions · 30 min" },
-  { time: "10:00", title: "Closures & scope", meta: "Lesson + 4 exercises" },
-  { time: "12:30", title: "CSS layout lab", meta: "Flexbox · Grid · responsive" },
-  { time: "15:00", title: "Coding round", meta: "3 timed problems · 90 min" },
-];
 
 const interviewTopics = [
   ["JavaScript", "68 questions", "#a78bfa"],
@@ -27,8 +21,8 @@ export default function Home() {
           <h1>Learn frontend.<br /><span>Prove what you know.</span></h1>
           <p>Short lessons, real coding tasks, and interview practice that adapts to your weak spots—not another endless playlist.</p>
           <div className="hero-actions">
-            <Link href="/learn/javascript/variables-and-types" className="button button-primary">Start learning <span aria-hidden>→</span></Link>
-            <a href="#sprint" className="button button-secondary">See 2-day sprint</a>
+            <Link href="/learn/javascript" className="button button-primary">Start learning <span aria-hidden>→</span></Link>
+            <Link href="/sprint" className="button button-secondary">See 2-day sprint</Link>
           </div>
           <div className="hero-proof">
             <div><strong>20</strong><span>launch lessons</span></div>
@@ -44,7 +38,7 @@ export default function Home() {
               <div className="mastery-row" key={name}><span>{name}</span><div className="progress-track"><i style={{ width: `${value}%` }} /></div><strong>{value}%</strong></div>
             ))}
           </div>
-          <Link href="/learn/javascript/variables-and-types" className="continue-link"><span><b>Continue:</b> Variables & data types</span><span>12 min&nbsp; →</span></Link>
+          <Link href="/learn/javascript" className="continue-link"><span><b>Start:</b> JavaScript foundations</span><span>6 lessons&nbsp; →</span></Link>
         </div>
       </section>
 
@@ -64,10 +58,10 @@ export default function Home() {
       <section className="sprint-wrap" id="sprint"><div className="sprint page-width">
         <div className="sprint-copy"><span className="overline accent">INTERVIEW IN 48 HOURS?</span><h2>Cut the noise.<br />Study what matters.</h2><p>Your diagnostic score, target role, and available hours become a focused two-day plan.</p>
           <ul><li><span>01</span> Find your highest-impact weak areas</li><li><span>02</span> Mix recall, coding, and speaking practice</li><li><span>03</span> Finish with a readiness report</li></ul>
-          <button className="button button-primary" type="button">Build my sprint <span>→</span></button>
+          <Link href="/sprint" className="button button-primary">Build my sprint <span>→</span></Link>
         </div>
         <div className="timeline-card"><div className="timeline-top"><div><span>DAY 1 OF 2</span><h3>Core knowledge & coding</h3></div><b>6h 30m</b></div><div className="timeline-progress"><i /></div>
-          <div className="timeline-list">{sprintItems.map((item, index) => <div className="timeline-item" key={item.time}><time>{item.time}</time><span className={index === 0 ? "active-node" : ""} /><div><strong>{item.title}</strong><small>{item.meta}</small></div>{index === 0 && <b className="now-pill">START HERE</b>}</div>)}</div>
+          <div className="timeline-list">{sprintItems.slice(0, 4).map((item, index) => <div className="timeline-item" key={item.key}><time>{item.time}</time><span className={index === 0 ? "active-node" : ""} /><div><strong>{item.title}</strong><small>{item.category} · {item.duration} min</small></div>{index === 0 && <b className="now-pill">START HERE</b>}</div>)}</div>
         </div>
       </div></section>
 
@@ -75,7 +69,7 @@ export default function Home() {
         <div className="section-heading"><div><span className="overline accent">ANSWER WITH CONFIDENCE</span><h2>Interview answers with depth.</h2></div><p>Start with the 30-second answer, then open the reasoning, examples, and likely follow-ups.</p></div>
         <div className="topic-grid">{interviewTopics.map(([title, count, color], index) => <article className="topic-card" key={title} style={{ "--topic": color } as React.CSSProperties}><span className="topic-number">0{index + 1}</span><div><h3>{title}</h3><p>{count}</p></div><span className="topic-arrow">↗</span></article>)}</div>
       </section>
-      <footer className="site-footer page-width"><div className="brand"><span className="brand-mark">F</span><span>Frontend<strong>Prep</strong></span></div><p>Learn clearly. Practice deliberately. Interview confidently.</p><span>Phase 0 · Original learning content</span></footer>
+      <footer className="site-footer page-width"><div className="brand"><span className="brand-mark">F</span><span>Frontend<strong>Prep</strong></span></div><p>Learn clearly. Practice deliberately. Interview confidently.</p><span>Phase 2 · Original learning content</span></footer>
     </main>
   );
 }
