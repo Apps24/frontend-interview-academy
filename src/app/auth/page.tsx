@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AuthForm } from "@/components/auth-form";
 import { signIn, signUp } from "./actions";
 import { createClient } from "@/lib/supabase/server";
 
@@ -26,12 +27,7 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
       <h1>{isSignUp ? "Start building proof." : "Continue your progress."}</h1>
       <p>Your lesson progress, quiz attempts, and future interview plans stay synced to your account.</p>
       {params.message && <div className="auth-message" role="status">{params.message}</div>}
-      <form className="auth-form">
-        {isSignUp && <label>Full name<input name="displayName" type="text" autoComplete="name" maxLength={80} required /></label>}
-        <label>Email address<input name="email" type="email" autoComplete="email" required /></label>
-        <label>Password<input name="password" type="password" autoComplete={isSignUp ? "new-password" : "current-password"} minLength={8} required /></label>
-        <button className="button button-primary" formAction={isSignUp ? signUp : signIn}>{isSignUp ? "Create free account" : "Sign in"}</button>
-      </form>
+      <AuthForm isSignUp={isSignUp} action={isSignUp ? signUp : signIn} />
       <p className="auth-switch">{isSignUp ? "Already have an account?" : "New to FrontendPrep?"} <Link href={isSignUp ? "/auth" : "/auth?mode=signup"}>{isSignUp ? "Sign in" : "Create one"}</Link></p>
       <Link href="/" className="back-link auth-back">← Back to the academy</Link>
     </section>

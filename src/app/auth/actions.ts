@@ -10,6 +10,14 @@ function authRedirect(message: string, mode: "signin" | "signup" = "signin"): ne
   redirect(`/auth?mode=${mode}&message=${encodeURIComponent(message)}`);
 }
 
+function friendlyAuthError(error: { code?: string; message: string; status?: number }) {
+  if (error.code === "over_email_send_rate_limit" || error.status === 429) return "Too many confirmation emails were requested. Please wait before trying again.";
+  if (error.code === "email_address_invalid") return "Enter a deliverable email address.";
+  if (error.code === "signup_disabled") return "New account registration is temporarily disabled.";
+  if (error.code === "unexpected_failure" || /database error (saving|creating) new user/i.test(error.message)) return "Account creation is temporarily unavailable. Please try again shortly.";
+  return error.message;
+}
+
 function readCredentials(formData: FormData, mode: "signin" | "signup" = "signin") {
   const email = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
@@ -40,7 +48,7 @@ export async function signIn(formData: FormData) {
   const credentials = readCredentials(formData);
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword(credentials);
-  if (error) authRedirect(error.message);
+  if (error) authRedirect(friendlyAuthError(error));
 
   await ensureProfile();
   revalidatePath("/", "layout");
@@ -64,7 +72,7 @@ export async function signUp(formData: FormData) {
     },
   });
 
-  if (error) authRedirect(error.message, "signup");
+  if (error) authRedirect(friendlyAuthError(error), "signup");
   if (data.session) {
     await ensureProfile(displayName);
     revalidatePath("/", "layout");
