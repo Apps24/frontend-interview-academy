@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { sprintItems } from "@/lib/interview-sprint";
 import { tracks } from "@/lib/curriculum";
+import { createClient } from "@/lib/supabase/server";
 
 const interviewTopics = [
   ["JavaScript", "6 launch questions", "#a78bfa", "javascript"],
@@ -11,7 +12,13 @@ const interviewTopics = [
   ["CSS", "3 launch questions", "#fb7185", "css"],
 ];
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createClient();
+  const [{ count: lessonCount }, { count: questionCount }, { count: problemCount }] = await Promise.all([
+    supabase.from("lessons").select("id", { count: "exact", head: true }).eq("status", "published"),
+    supabase.from("interview_questions").select("id", { count: "exact", head: true }).eq("status", "published"),
+    supabase.from("practice_problems").select("id", { count: "exact", head: true }).eq("status", "published"),
+  ]);
   return (
     <main className="app-shell">
       <SiteHeader />
@@ -25,9 +32,9 @@ export default function Home() {
             <Link href="/diagnostic" className="button button-secondary">Take the diagnostic</Link>
           </div>
           <div className="hero-proof">
-            <div><strong>20</strong><span>launch lessons</span></div>
-            <div><strong>100+</strong><span>review questions</span></div>
-            <div><strong>6</strong><span>coding challenges</span></div>
+            <div><strong>{lessonCount ?? 31}</strong><span>JavaScript lessons</span></div>
+            <div><strong>{questionCount ?? 62}</strong><span>technical questions</span></div>
+            <div><strong>{problemCount ?? 31}</strong><span>coding challenges</span></div>
           </div>
         </div>
         <div className="readiness-card" aria-label="Sample readiness dashboard">
@@ -38,7 +45,7 @@ export default function Home() {
               <div className="mastery-row" key={name}><span>{name}</span><div className="progress-track"><i style={{ width: `${value}%` }} /></div><strong>{value}%</strong></div>
             ))}
           </div>
-          <Link href="/learn/javascript" className="continue-link"><span><b>Start:</b> JavaScript foundations</span><span>6 lessons&nbsp; →</span></Link>
+          <Link href="/learn/javascript" className="continue-link"><span><b>Start:</b> JavaScript foundations</span><span>{lessonCount ?? 31} lessons&nbsp; →</span></Link>
         </div>
       </section>
 
@@ -48,7 +55,7 @@ export default function Home() {
           {tracks.map((track, index) => (
             <article className="track-card" key={track.slug}>
               <div className={`track-icon track-icon-${index + 1}`}>{track.mark}</div><span className="track-level">{track.level}</span>
-              <h3>{track.title}</h3><p>{track.description}</p><div className="track-meta"><span>{track.lessons} lessons</span><span>{track.duration}</span></div>
+              <h3>{track.title}</h3><p>{track.description}</p><div className="track-meta"><span>{track.slug === "javascript" ? lessonCount ?? 31 : track.lessons} lessons</span><span>{track.slug === "javascript" ? "Complete beginner path" : track.duration}</span></div>
               <div className="track-progress"><i style={{ width: `${track.progress}%` }} /></div><Link href={track.href}>{track.progress ? "Continue track" : "Explore track"} <span>→</span></Link>
             </article>
           ))}
@@ -70,7 +77,7 @@ export default function Home() {
         <div className="topic-grid">{interviewTopics.map(([title, count, color, slug], index) => <Link href={`/interview?topic=${slug}`} className="topic-card" key={title} style={{ "--topic": color } as React.CSSProperties}><span className="topic-number">0{index + 1}</span><div><h3>{title}</h3><p>{count}</p></div><span className="topic-arrow">↗</span></Link>)}</div>
       </section>
       <section className="pricing-section page-width" id="pricing"><div className="section-heading"><div><span className="overline accent">SIMPLE ACCESS</span><h2>Start free. Go deeper with Pro.</h2></div><p>Learn the foundations before paying. Upgrade only when you want the complete interview answer library.</p></div><div className="pricing-grid"><article><span className="overline">FREE</span><h3>$0</h3><p>Build momentum with the core learning and practice experience.</p><ul><li>JavaScript learning track</li><li>10 detailed interview answers</li><li>Two-day interview sprint</li><li>STAR answer workspace for behavioral questions</li><li>Progress and bookmarks</li></ul><Link href="/auth?mode=signup" className="button button-secondary">Start free</Link></article><article className="featured"><span className="overline accent">PRO · COMING NEXT</span><h3>Full library</h3><p>Go beyond memorized replies with deeper explanations and follow-ups.</p><ul><li>Every detailed interview answer</li><li>Code examples and mental models</li><li>Behavioral example outlines and pitfalls</li><li>Advanced follow-up prompts</li><li>Future premium prep tracks</li></ul><Link href="/interview" className="button button-primary">Preview Pro questions</Link></article></div></section>
-      <footer className="site-footer page-width"><div className="brand"><span className="brand-mark">F</span><span>Frontend<strong>Prep</strong></span></div><p>Learn clearly. Practice deliberately. Interview confidently.</p><span>Phase 4 · Behavioral question bank</span></footer>
+      <footer className="site-footer page-width"><div className="brand"><span className="brand-mark">F</span><span>Frontend<strong>Prep</strong></span></div><p>Learn clearly. Practice deliberately. Interview confidently.</p><span>JavaScript Beginner · Batch 1</span></footer>
     </main>
   );
 }
